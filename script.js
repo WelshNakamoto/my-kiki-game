@@ -29,6 +29,11 @@ class Game {
         this.lastMonsterSpawn = 0;
         this.itemDropChance = 0.1; // 아이템 드롭 확률
         
+        // 업그레이드/버프 상태
+        this.upgradeWeaponCount = 0;
+        this.upgradeHpCount = 0;
+        this.upgradeSpeedCount = 0;
+        
         this.init();
     }
     
@@ -364,15 +369,18 @@ class Game {
     
     applyUpgrade(type) {
         switch (type) {
-            case 0: // 무기 강화
+            case 0:
                 this.player.weaponDamage *= 1.2;
+                this.upgradeWeaponCount++;
                 break;
-            case 1: // 체력 증가
+            case 1:
                 this.player.maxHp += 30;
                 this.player.hp = Math.min(this.player.hp + 30, this.player.maxHp);
+                this.upgradeHpCount++;
                 break;
-            case 2: // 이동 속도
+            case 2:
                 this.player.speed *= 1.15;
+                this.upgradeSpeedCount++;
                 break;
         }
     }
@@ -417,6 +425,20 @@ class Game {
             this.player.levelUp();
             this.showLevelUpModal();
         }
+        
+        // 업그레이드 정보 표시
+        document.getElementById('upgradeWeapon').textContent = this.upgradeWeaponCount;
+        document.getElementById('upgradeHp').textContent = this.upgradeHpCount;
+        document.getElementById('upgradeSpeed').textContent = this.upgradeSpeedCount;
+        // 버프 정보 표시
+        const buffInfo = document.getElementById('buffInfo');
+        let buffs = [];
+        if (this.player.magnetActive) buffs.push(`<div class='buff-active'>자석: ${(this.player.magnetTime/1000).toFixed(1)}s</div>`);
+        if (this.player.isInvincible && this.player.invincibilityTime > 0) buffs.push(`<div class='buff-active'>쉴드: ${(this.player.invincibilityTime/1000).toFixed(1)}s</div>`);
+        if (this.player.speedBoostActive) buffs.push(`<div class='buff-active'>속도: ${(this.player.speedBoostTime/1000).toFixed(1)}s</div>`);
+        if (this.player.cooldownReductionActive) buffs.push(`<div class='buff-active'>쿨타임: ${(this.player.cooldownReductionTime/1000).toFixed(1)}s</div>`);
+        if (buffs.length === 0) buffs.push(`<div class='buff-inactive'>활성화된 버프 없음</div>`);
+        buffInfo.innerHTML = buffs.join('');
     }
     
     showLevelUpModal() {
@@ -473,6 +495,11 @@ class Game {
         this.score = 0;
         this.monsterSpawnRate = 2000;
         this.lastMonsterSpawn = 0;
+        
+        // 업그레이드/버프 상태 초기화
+        this.upgradeWeaponCount = 0;
+        this.upgradeHpCount = 0;
+        this.upgradeSpeedCount = 0;
         
         // 플레이어 초기화
         this.createPlayer();
