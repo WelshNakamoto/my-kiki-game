@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 서바이벌 캣: 키키의 밤</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- 상단 UI -->
+        <div id="topUI">
+            <div id="leftUI">
+                <div id="healthBar">
+                    <div id="healthFill"></div>
+                    <span id="healthText">HP: 100/100</span>
+                </div>
+                <div id="expBar">
+                    <div id="expFill"></div>
+                    <span id="expText">XP: 0/100</span>
+                </div>
+            </div>
+            <div id="rightUI">
+                <div id="timeDisplay">시간: 00:00</div>
+                <div id="levelDisplay">레벨: 1</div>
+                <div id="scoreDisplay">점수: 0</div>
+            </div>
+        </div>
+
+        <!-- 게임 캔버스 -->
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- 레벨업 UI (처음에는 숨김) -->
+        <div id="levelUpModal" class="modal">
+            <div class="modal-content">
+                <h2>🎉 레벨업!</h2>
+                <p>업그레이드를 선택하세요:</p>
+                <div id="upgradeOptions">
+                    <button class="upgrade-btn" data-upgrade="0">
+                        <strong>무기 강화</strong>
+                        <br>공격력 +20%
+                    </button>
+                    <button class="upgrade-btn" data-upgrade="1">
+                        <strong>체력 증가</strong>
+                        <br>최대 HP +30
+                    </button>
+                    <button class="upgrade-btn" data-upgrade="2">
+                        <strong>이동 속도</strong>
+                        <br>속도 +15%
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 오버 UI -->
+        <div id="gameOverModal" class="modal">
+            <div class="modal-content">
+                <h2>💀 게임 오버</h2>
+                <p id="survivalTime">생존 시간: 00:00</p>
+                <p id="finalScore">최종 점수: 0</p>
+                <button id="restartBtn">다시 시작</button>
+            </div>
+        </div>
+
+        <!-- 게임 클리어 UI -->
+        <div id="gameClearModal" class="modal">
+            <div class="modal-content">
+                <h2>🎊 축하합니다!</h2>
+                <p>10분 생존에 성공했습니다!</p>
+                <p id="clearTime">생존 시간: 10:00</p>
+                <p id="clearScore">최종 점수: 0</p>
+                <button id="continueBtn">계속 플레이</button>
+                <button id="restartClearBtn">다시 시작</button>
+            </div>
+        </div>
+
+        <!-- 조작 안내 -->
+        <div id="controls">
+            <p>🎮 조작: WASD로 이동 | 🎯 자동 공격</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

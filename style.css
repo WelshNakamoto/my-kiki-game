@@ -1,0 +1,257 @@
+/* 기본 스타일 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f0f23);
+    color: #ffffff;
+    overflow: hidden;
+    user-select: none;
+}
+
+#gameContainer {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* 상단 UI */
+#topUI {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 100;
+}
+
+#leftUI, #rightUI {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 체력바 */
+#healthBar, #expBar {
+    position: relative;
+    width: 200px;
+    height: 25px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #555;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#healthFill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444, #ff6666);
+    transition: width 0.3s ease;
+    width: 100%;
+}
+
+#expFill {
+    height: 100%;
+    background: linear-gradient(90deg, #4444ff, #6666ff);
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+#healthText, #expText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+}
+
+/* 우측 UI */
+#rightUI div {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    font-weight: bold;
+    text-align: center;
+    min-width: 120px;
+}
+
+#timeDisplay {
+    color: #ffff44;
+}
+
+#levelDisplay {
+    color: #44ff44;
+}
+
+#scoreDisplay {
+    color: #ff44ff;
+}
+
+/* 게임 캔버스 */
+#gameCanvas {
+    border: 3px solid #444;
+    border-radius: 10px;
+    background: #000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+/* 모달 스타일 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #2d2d44, #3d3d55);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    border: 2px solid #555;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* 업그레이드 버튼 */
+#upgradeOptions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.upgrade-btn {
+    background: linear-gradient(135deg, #4a4a6a, #5a5a7a);
+    border: 2px solid #666;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    font-size: 14px;
+}
+
+.upgrade-btn:hover {
+    background: linear-gradient(135deg, #5a5a7a, #6a6a8a);
+    border-color: #888;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.upgrade-btn:active {
+    transform: translateY(0);
+}
+
+/* 기타 버튼 */
+button {
+    background: linear-gradient(135deg, #ff4444, #ff6666);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    margin: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #ff6666, #ff8888);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+}
+
+#continueBtn {
+    background: linear-gradient(135deg, #44ff44, #66ff66);
+}
+
+#continueBtn:hover {
+    background: linear-gradient(135deg, #66ff66, #88ff88);
+    box-shadow: 0 5px 15px rgba(68, 255, 68, 0.3);
+}
+
+/* 조작 안내 */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    z-index: 100;
+}
+
+#controls p {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 900px) {
+    #gameCanvas {
+        width: 95vw;
+        height: 60vh;
+    }
+    
+    #topUI {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    #leftUI, #rightUI {
+        width: 100%;
+    }
+    
+    #upgradeOptions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* 모달 표시 */
+.modal.show {
+    display: flex;
+}
+
+/* 아이템 애니메이션 */
+@keyframes itemPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.item-pulse {
+    animation: itemPulse 0.5s ease-in-out;
+} 
