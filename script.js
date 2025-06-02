@@ -110,7 +110,7 @@ class Game {
         this.player.update(deltaTime, this.keys);
         
         // 자동 공격
-        this.player.autoAttack(deltaTime, this.bullets);
+        this.player.autoAttack(deltaTime, this.bullets, this.monsters);
         
         // 몬스터 스폰
         this.spawnMonsters(gameTime);
@@ -578,7 +578,7 @@ class Player {
         }
     }
     
-    autoAttack(deltaTime, bullets) {
+    autoAttack(deltaTime, bullets, monsters) {
         const currentTime = Date.now();
         let cooldown = this.attackCooldown;
         
@@ -591,7 +591,7 @@ class Player {
             let closestMonster = null;
             let closestDistance = Infinity;
             
-            game.monsters.forEach(monster => {
+            monsters.forEach(monster => {
                 const dx = monster.x - this.x;
                 const dy = monster.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);

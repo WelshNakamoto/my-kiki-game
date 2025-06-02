@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 - 키키의 밤</title>
+    <style>
+        body {
+            background: #001122;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #testCanvas {
+            border: 2px solid #fff;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 키키의 밤 - 테스트</h1>
+    <p>이 페이지가 보인다면 HTML은 정상 작동합니다!</p>
+    
+    <canvas id="testCanvas" width="400" height="300"></canvas>
+    
+    <div id="output">
+        <p>JavaScript 테스트 중...</p>
+    </div>
+
+    <script>
+        console.log("JavaScript가 실행되고 있습니다!");
+        
+        // DOM 요소 확인
+        const canvas = document.getElementById('testCanvas');
+        const output = document.getElementById('output');
+        
+        if (canvas) {
+            console.log("Canvas 요소를 찾았습니다!");
+            const ctx = canvas.getContext('2d');
+            
+            // 간단한 그리기 테스트
+            ctx.fillStyle = '#ff8800';
+            ctx.fillRect(50, 50, 100, 100);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '20px Arial';
+            ctx.fillText('테스트', 70, 110);
+            
+            output.innerHTML = '<p style="color: green;">✅ Canvas가 정상 작동합니다!</p>';
+        } else {
+            console.error("Canvas 요소를 찾을 수 없습니다!");
+            output.innerHTML = '<p style="color: red;">❌ Canvas 오류!</p>';
+        }
+        
+        // 원본 게임 파일들 확인
+        fetch('script.js')
+            .then(response => {
+                if (response.ok) {
+                    output.innerHTML += '<p style="color: green;">✅ script.js 파일이 존재합니다!</p>';
+                } else {
+                    output.innerHTML += '<p style="color: red;">❌ script.js 파일을 찾을 수 없습니다!</p>';
+                }
+            })
+            .catch(error => {
+                output.innerHTML += '<p style="color: red;">❌ 파일 확인 중 오류: ' + error.message + '</p>';
+            });
+            
+        fetch('style.css')
+            .then(response => {
+                if (response.ok) {
+                    output.innerHTML += '<p style="color: green;">✅ style.css 파일이 존재합니다!</p>';
+                } else {
+                    output.innerHTML += '<p style="color: red;">❌ style.css 파일을 찾을 수 없습니다!</p>';
+                }
+            })
+            .catch(error => {
+                output.innerHTML += '<p style="color: red;">❌ CSS 파일 확인 중 오류: ' + error.message + '</p>';
+            });
+    </script>
+</body>
+</html> 

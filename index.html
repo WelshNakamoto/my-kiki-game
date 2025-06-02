@@ -78,8 +78,37 @@
         <div id="controls">
             <p>🎮 조작: WASD로 이동 | 🎯 자동 공격</p>
         </div>
+
+        <!-- 로딩/오류 표시 -->
+        <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; color: white; font-size: 18px;">
+            🎮 게임 로딩 중...
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // 오류 감지를 위한 전역 오류 핸들러
+        window.addEventListener('error', function(e) {
+            console.error('게임 오류:', e.error);
+            document.getElementById('loading').innerHTML = '❌ 게임 로딩 실패: ' + e.message + '<br><button onclick="location.reload()">새로고침</button>';
+        });
+
+        // DOM이 완전히 로드된 후 스크립트 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM 로딩 완료, 게임 스크립트 로딩 시작...');
+            
+            // 스크립트 동적 로딩
+            const script = document.createElement('script');
+            script.src = 'script.js';
+            script.onload = function() {
+                console.log('게임 스크립트 로딩 완료!');
+                document.getElementById('loading').style.display = 'none';
+            };
+            script.onerror = function() {
+                console.error('script.js 로딩 실패!');
+                document.getElementById('loading').innerHTML = '❌ script.js 파일을 찾을 수 없습니다!<br><button onclick="location.reload()">새로고침</button>';
+            };
+            document.head.appendChild(script);
+        });
+    </script>
 </body>
 </html> 
