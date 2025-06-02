@@ -209,27 +209,23 @@ class Game {
     createMonster(stage) {
         const edge = Math.random();
         let x, y;
-        
-        if (edge < 0.25) { // 위쪽
-            x = Math.random() * this.canvas.width;
-            y = -30;
-        } else if (edge < 0.5) { // 아래쪽
-            x = Math.random() * this.canvas.width;
-            y = this.canvas.height + 30;
-        } else if (edge < 0.75) { // 왼쪽
-            x = -30;
-            y = Math.random() * this.canvas.height;
-        } else { // 오른쪽
-            x = this.canvas.width + 30;
-            y = Math.random() * this.canvas.height;
-        }
-        
-        // 몬스터 타입 결정
-        let monsterType = 'normal';
-        if (stage >= 1 && Math.random() < 0.3) monsterType = 'fast';
-        if (stage >= 2 && Math.random() < 0.2) monsterType = 'tank';
-        if (stage >= 3 && Math.random() < 0.1) monsterType = 'elite';
-        
+        if (edge < 0.25) { x = Math.random() * this.canvas.width; y = -30; }
+        else if (edge < 0.5) { x = Math.random() * this.canvas.width; y = this.canvas.height + 30; }
+        else if (edge < 0.75) { x = -30; y = Math.random() * this.canvas.height; }
+        else { x = this.canvas.width + 30; y = Math.random() * this.canvas.height; }
+
+        // 7가지 몬스터 타입 확장
+        const monsterTypes = ['normal', 'fast', 'tank', 'elite', 'mini', 'spiky', 'ghost'];
+        let weights = [1, 0.7, 0.5, 0.3, 0.6, 0.4, 0.2]; // 등장 확률 가중치
+        // stage가 높아질수록 강한 몬스터 등장 확률 증가
+        if (stage >= 2) { weights = [0.8, 0.7, 0.7, 0.5, 0.6, 0.5, 0.3]; }
+        if (stage >= 4) { weights = [0.6, 0.7, 0.8, 0.7, 0.5, 0.6, 0.5]; }
+        // 가중치 기반 랜덤 선택
+        let sum = weights.reduce((a, b) => a + b, 0);
+        let r = Math.random() * sum;
+        let idx = 0;
+        while (r > weights[idx]) { r -= weights[idx++]; }
+        let monsterType = monsterTypes[idx];
         this.monsters.push(new Monster(x, y, monsterType));
     }
     
@@ -727,10 +723,8 @@ class Monster {
         this.type = type;
         this.frozen = false;
         this.freezeTime = 0;
-        
-        // 타입별 설정
         switch (type) {
-            case 'normal':
+            case 'normal': // 빨간 원
                 this.radius = 12;
                 this.speed = 80;
                 this.hp = 40;
@@ -740,7 +734,7 @@ class Monster {
                 this.xpValue = 10;
                 this.scoreValue = 10;
                 break;
-            case 'fast':
+            case 'fast': // 초록 원
                 this.radius = 10;
                 this.speed = 150;
                 this.hp = 25;
@@ -750,8 +744,8 @@ class Monster {
                 this.xpValue = 15;
                 this.scoreValue = 15;
                 break;
-            case 'tank':
-                this.radius = 18;
+            case 'tank': // 파란 사각형
+                this.radius = 16;
                 this.speed = 50;
                 this.hp = 100;
                 this.maxHp = 100;
@@ -760,15 +754,45 @@ class Monster {
                 this.xpValue = 25;
                 this.scoreValue = 25;
                 break;
-            case 'elite':
+            case 'elite': // 보라 다이아몬드
                 this.radius = 15;
                 this.speed = 100;
                 this.hp = 80;
                 this.maxHp = 80;
                 this.damage = 15;
-                this.color = '#ff44ff';
+                this.color = '#bb44ff';
                 this.xpValue = 30;
                 this.scoreValue = 30;
+                break;
+            case 'mini': // 노랑 작은 원
+                this.radius = 7;
+                this.speed = 120;
+                this.hp = 10;
+                this.maxHp = 10;
+                this.damage = 5;
+                this.color = '#ffe066';
+                this.xpValue = 5;
+                this.scoreValue = 5;
+                break;
+            case 'spiky': // 주황 삼각형
+                this.radius = 13;
+                this.speed = 90;
+                this.hp = 35;
+                this.maxHp = 35;
+                this.damage = 12;
+                this.color = '#ff9900';
+                this.xpValue = 12;
+                this.scoreValue = 12;
+                break;
+            case 'ghost': // 하늘색 반투명 반원
+                this.radius = 14;
+                this.speed = 70;
+                this.hp = 30;
+                this.maxHp = 30;
+                this.damage = 8;
+                this.color = '#66e0ff';
+                this.xpValue = 10;
+                this.scoreValue = 10;
                 break;
         }
     }
@@ -804,32 +828,67 @@ class Monster {
     
     render(ctx) {
         ctx.save();
-        
         if (this.frozen) {
             ctx.globalAlpha = 0.5;
             ctx.filter = 'hue-rotate(180deg)';
         }
-        
-        // 몬스터 그리기
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        
+        // 타입별 모양
+        switch (this.type) {
+            case 'normal': // 원
+            case 'fast':
+            case 'mini':
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+            case 'tank': // 사각형
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.rect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+                ctx.fill();
+                break;
+            case 'elite': // 다이아몬드
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y - this.radius);
+                ctx.lineTo(this.x + this.radius, this.y);
+                ctx.lineTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x - this.radius, this.y);
+                ctx.closePath();
+                ctx.fill();
+                break;
+            case 'spiky': // 삼각형
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y - this.radius);
+                ctx.lineTo(this.x + this.radius, this.y + this.radius);
+                ctx.lineTo(this.x - this.radius, this.y + this.radius);
+                ctx.closePath();
+                ctx.fill();
+                break;
+            case 'ghost': // 반원(투명)
+                ctx.globalAlpha *= 0.5;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, Math.PI, 0, false);
+                ctx.lineTo(this.x + this.radius, this.y);
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI, true);
+                ctx.closePath();
+                ctx.fill();
+                break;
+        }
         // HP바
         if (this.hp < this.maxHp) {
             const barWidth = this.radius * 2;
             const barHeight = 4;
             const barY = this.y - this.radius - 8;
-            
             ctx.fillStyle = '#000000';
             ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
-            
             ctx.fillStyle = '#ff0000';
             const healthPercent = this.hp / this.maxHp;
             ctx.fillRect(this.x - barWidth/2, barY, barWidth * healthPercent, barHeight);
         }
-        
         ctx.restore();
     }
 }
