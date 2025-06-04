@@ -1,4 +1,40 @@
-// 🎮 키키의 밤 - 게임 메인 로직
+// 키키의 밤 - 게임 메인 로직
+
+// 1. 파일 상단에 이미지 로딩
+const playerImage = new Image();
+playerImage.src = 'img/kiki.png';
+
+// 1. 파일 상단에 몬스터 이미지 매핑 추가
+const monsterImages = {
+  normal: new Image(),
+  fast: new Image(),
+  tank: new Image(),
+  elite: new Image(),
+  mini: new Image(),
+  spiky: new Image(),
+  ghost: new Image()
+};
+monsterImages.normal.src = 'img/zombie_1.png';
+monsterImages.fast.src = 'img/zombie_2.png';
+monsterImages.tank.src = 'img/zombie_3.png';
+monsterImages.elite.src = 'img/zombie_4.png';
+monsterImages.mini.src = 'img/zombie_5.png';
+monsterImages.spiky.src = 'img/zombie_6.png';
+monsterImages.ghost.src = 'img/zombie_7.png';
+
+// 1. 파일 상단에 방향별 이미지 로딩
+const playerImages = {
+  down: new Image(),
+  up: new Image(),
+  left: new Image(),
+  right: new Image(),
+  default: new Image()
+};
+playerImages.default.src = 'img/kiki.png';
+playerImages.down.src = 'img/kiki_down.png';
+playerImages.up.src = 'img/kiki_up.png';
+playerImages.left.src = 'img/kiki_left.png';
+playerImages.right.src = 'img/kiki_right.png';
 
 class Game {
     constructor() {
@@ -542,22 +578,26 @@ class Player {
         this.speedBoostTime = 0;
         this.cooldownReductionActive = false;
         this.cooldownReductionTime = 0;
+        // 방향 상태
+        this.direction = 'down'; // 기본값
     }
     
     update(deltaTime, keys) {
-        // 이동
         let dx = 0, dy = 0;
         if (keys['w'] || keys['arrowup']) dy = -1;
         if (keys['s'] || keys['arrowdown']) dy = 1;
         if (keys['a'] || keys['arrowleft']) dx = -1;
         if (keys['d'] || keys['arrowright']) dx = 1;
-        
         // 대각선 이동 정규화
-        if (dx !== 0 && dy !== 0) {
-            dx *= 0.707;
-            dy *= 0.707;
+        if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
+        // 방향 갱신
+        if (dx !== 0 || dy !== 0) {
+            if (Math.abs(dx) > Math.abs(dy)) {
+                this.direction = dx > 0 ? 'right' : 'left';
+            } else if (Math.abs(dy) > 0) {
+                this.direction = dy > 0 ? 'down' : 'up';
+            }
         }
-        
         // 속도 부스트 적용
         let currentSpeed = this.speed;
         if (this.speedBoostActive) {
@@ -567,15 +607,12 @@ class Player {
                 this.speedBoostActive = false;
             }
         }
-        
         // 위치 업데이트
         this.x += dx * currentSpeed * (deltaTime / 1000);
         this.y += dy * currentSpeed * (deltaTime / 1000);
-        
         // 화면 경계 처리
         this.x = Math.max(this.radius, Math.min(800 - this.radius, this.x));
         this.y = Math.max(this.radius, Math.min(600 - this.radius, this.y));
-        
         // 무적 시간 처리
         if (this.isInvincible) {
             this.invincibilityTime -= deltaTime;
@@ -583,7 +620,6 @@ class Player {
                 this.isInvincible = false;
             }
         }
-        
         // 자석 효과 처리
         if (this.magnetActive) {
             this.magnetTime -= deltaTime;
@@ -591,7 +627,6 @@ class Player {
                 this.magnetActive = false;
             }
         }
-        
         // 쿨타임 감소 효과 처리
         if (this.cooldownReductionActive) {
             this.cooldownReductionTime -= deltaTime;
@@ -689,39 +724,42 @@ class Player {
     
     render(ctx) {
         ctx.save();
-        
-        // 무적 시 깜빡임 효과
         if (this.isInvincible && Math.floor(Date.now() / 100) % 2) {
             ctx.globalAlpha = 0.5;
         }
-        
-        // 키키(고양이) 그리기
-        ctx.fillStyle = '#ff8800';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 귀
-        ctx.fillStyle = '#ff6600';
-        ctx.beginPath();
-        ctx.arc(this.x - 8, this.y - 10, 5, 0, Math.PI * 2);
-        ctx.arc(this.x + 8, this.y - 10, 5, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 눈
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(this.x - 5, this.y - 3, 3, 0, Math.PI * 2);
-        ctx.arc(this.x + 5, this.y - 3, 3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#000000';
-        ctx.beginPath();
-        ctx.arc(this.x - 5, this.y - 3, 1, 0, Math.PI * 2);
-        ctx.arc(this.x + 5, this.y - 3, 1, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 특수 효과 표시
+        // 방향에 맞는 이미지 선택
+        let img = playerImages[this.direction] || playerImages.default;
+        if (img && img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(
+                img,
+                this.x - this.radius, this.y - this.radius,
+                this.radius * 2, this.radius * 2
+            );
+        } else {
+            // 기존 도형 fallback
+            ctx.fillStyle = '#ff8800';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            // 귀
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.arc(this.x - 8, this.y - 10, 5, 0, Math.PI * 2);
+            ctx.arc(this.x + 8, this.y - 10, 5, 0, Math.PI * 2);
+            ctx.fill();
+            // 눈
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(this.x - 5, this.y - 3, 3, 0, Math.PI * 2);
+            ctx.arc(this.x + 5, this.y - 3, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(this.x - 5, this.y - 3, 1, 0, Math.PI * 2);
+            ctx.arc(this.x + 5, this.y - 3, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        // 특수 효과(자석, 속도 등)는 기존대로
         if (this.magnetActive) {
             ctx.strokeStyle = '#4444ff';
             ctx.lineWidth = 2;
@@ -729,7 +767,6 @@ class Player {
             ctx.arc(this.x, this.y, this.radius + 10, 0, Math.PI * 2);
             ctx.stroke();
         }
-        
         if (this.speedBoostActive) {
             ctx.strokeStyle = '#44ff44';
             ctx.lineWidth = 2;
@@ -737,7 +774,6 @@ class Player {
             ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
             ctx.stroke();
         }
-        
         ctx.restore();
     }
 }
@@ -859,51 +895,59 @@ class Monster {
             ctx.globalAlpha = 0.5;
             ctx.filter = 'hue-rotate(180deg)';
         }
-        // 타입별 모양
-        switch (this.type) {
-            case 'normal': // 원
-            case 'fast':
-            case 'mini':
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fill();
-                break;
-            case 'tank': // 사각형
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.rect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-                ctx.fill();
-                break;
-            case 'elite': // 다이아몬드
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y - this.radius);
-                ctx.lineTo(this.x + this.radius, this.y);
-                ctx.lineTo(this.x, this.y + this.radius);
-                ctx.lineTo(this.x - this.radius, this.y);
-                ctx.closePath();
-                ctx.fill();
-                break;
-            case 'spiky': // 삼각형
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y - this.radius);
-                ctx.lineTo(this.x + this.radius, this.y + this.radius);
-                ctx.lineTo(this.x - this.radius, this.y + this.radius);
-                ctx.closePath();
-                ctx.fill();
-                break;
-            case 'ghost': // 반원(투명)
-                ctx.globalAlpha *= 0.5;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, Math.PI, 0, false);
-                ctx.lineTo(this.x + this.radius, this.y);
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI, true);
-                ctx.closePath();
-                ctx.fill();
-                break;
+        // 이미지가 있으면 drawImage, 아니면 도형 fallback
+        const img = monsterImages[this.type];
+        if (img && img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(
+                img,
+                this.x - this.radius, this.y - this.radius,
+                this.radius * 2, this.radius * 2
+            );
+        } else {
+            // 기존 도형 fallback
+            switch (this.type) {
+                case 'normal': case 'fast': case 'mini':
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case 'tank':
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.rect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+                    ctx.fill();
+                    break;
+                case 'elite':
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y - this.radius);
+                    ctx.lineTo(this.x + this.radius, this.y);
+                    ctx.lineTo(this.x, this.y + this.radius);
+                    ctx.lineTo(this.x - this.radius, this.y);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                case 'spiky':
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y - this.radius);
+                    ctx.lineTo(this.x + this.radius, this.y + this.radius);
+                    ctx.lineTo(this.x - this.radius, this.y + this.radius);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                case 'ghost':
+                    ctx.globalAlpha *= 0.5;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, Math.PI, 0, false);
+                    ctx.lineTo(this.x + this.radius, this.y);
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI, true);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+            }
         }
         // HP바
         if (this.hp < this.maxHp) {
