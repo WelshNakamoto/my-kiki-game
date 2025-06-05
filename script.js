@@ -44,6 +44,31 @@ bgImage.src = 'img/background.png';
 const bgImage2 = new Image();
 bgImage2.src = 'img/background2.png';
 
+// 1. 파일 상단에 포인트 이미지 3종 로딩
+const xpOrbImages = [
+  new Image(), // 1단계
+  new Image(), // 2단계
+  new Image()  // 3단계
+];
+xpOrbImages[0].src = 'img/kiki_logo.png';
+xpOrbImages[1].src = 'img/stacks_logo.png';
+xpOrbImages[2].src = 'img/sbtc_logo.png';
+
+const itemDescriptions = [
+  { name: "체력 회복", desc: "HP 30% 회복" },
+  { name: "자석", desc: "5초간 XP(포인트) 자동 수집" },
+  { name: "쉴드", desc: "5초간 무적" },
+  { name: "무기 강화", desc: "무기 1레벨 강화(공격력 증가)" },
+  { name: "이동속도", desc: "5초간 이동속도 20% 증가" },
+  { name: "쿨타임 감소", desc: "5초간 공격 쿨타임 30% 감소(공격속도 증가)" },
+  { name: "폭탄", desc: "주변 몬스터 즉시 처치" },
+  { name: "시간정지", desc: "3초간 모든 몬스터 정지" },
+  { name: "랜덤상자", desc: "무작위 아이템 1개 지급" },
+  { name: "코인", desc: "점수/코인 획득" },
+  { name: "더블 미사일", desc: "5초간 미사일 2개 발사(2방향 공격)" },
+  { name: "연사", desc: "5초간 연사(자동공격 속도 대폭 증가)" }
+];
+
 class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -78,7 +103,22 @@ class Game {
         this.upgradeHpCount = 0;
         this.upgradeSpeedCount = 0;
         
+        // 아이템 목록 초기화
+        this.initializeItemList();
+        
         this.init();
+    }
+    
+    initializeItemList() {
+        const itemList = document.getElementById('itemList');
+        if (itemList) {
+            itemList.innerHTML = '';
+            itemDescriptions.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="item-name">${item.name}</span>: ${item.desc}`;
+                itemList.appendChild(li);
+            });
+        }
     }
     
     init() {
@@ -287,7 +327,7 @@ class Game {
                     
                     // 몬스터 사망 처리
                     if (monster.hp <= 0) {
-                        this.createXPOrb(monster.x, monster.y, monster.xpValue);
+                        this.createXPOrb(monster.x, monster.y, monster.xpValue, monster.type);
                         this.createParticles(monster.x, monster.y, '#ff4444');
                         this.score += monster.scoreValue;
                         
@@ -339,12 +379,15 @@ class Game {
         return distance < obj1.radius + obj2.radius;
     }
     
-    createXPOrb(x, y, value) {
-        this.xpOrbs.push(new XPOrb(x, y, value));
+    createXPOrb(x, y, value, monsterType = 'normal') {
+        let orbType = 1;
+        if ([ 'tank', 'spiky', 'elite' ].includes(monsterType)) orbType = 2;
+        if ([ 'ghost' ].includes(monsterType)) orbType = 3;
+        this.xpOrbs.push(new XPOrb(x, y, value, orbType));
     }
     
     createItem(x, y) {
-        const itemTypes = ['heal', 'magnet', 'shield', 'weapon_upgrade', 'speed', 'cooldown', 'bomb', 'timestop', 'random_box', 'coin'];
+        const itemTypes = ['heal', 'magnet', 'shield', 'weapon_upgrade', 'speed', 'cooldown', 'bomb', 'timestop', 'random_box', 'coin', 'missile_double', 'rapid_fire'];
         const type = itemTypes[Math.floor(Math.random() * itemTypes.length)];
         this.items.push(new Item(x, y, type));
     }
@@ -356,7 +399,7 @@ class Game {
     }
     
     applyItem(type) {
-        const itemTypes = ['heal', 'magnet', 'shield', 'weapon_upgrade', 'speed', 'cooldown', 'bomb', 'timestop', 'random_box', 'coin'];
+        const itemTypes = ['heal', 'magnet', 'shield', 'weapon_upgrade', 'speed', 'cooldown', 'bomb', 'timestop', 'random_box', 'coin', 'missile_double', 'rapid_fire'];
         
         switch (type) {
             case 'heal':
@@ -389,12 +432,18 @@ class Game {
             case 'coin':
                 this.score += 100;
                 break;
+            case 'missile_double':
+                this.player.activateMissileDouble(5000);
+                break;
+            case 'rapid_fire':
+                this.player.activateRapidFire(5000);
+                break;
         }
     }
     
     explodeAllMonsters() {
         this.monsters.forEach(monster => {
-            this.createXPOrb(monster.x, monster.y, monster.xpValue);
+            this.createXPOrb(monster.x, monster.y, monster.xpValue, monster.type);
             this.createParticles(monster.x, monster.y, '#ffaa00');
             this.score += monster.scoreValue;
         });
@@ -582,6 +631,10 @@ class Player {
         this.speedBoostTime = 0;
         this.cooldownReductionActive = false;
         this.cooldownReductionTime = 0;
+        this.missileDoubleActive = false;
+        this.missileDoubleTime = 0;
+        this.rapidFireActive = false;
+        this.rapidFireTime = 0;
         // 방향 상태
         this.direction = 'down'; // 기본값
     }
@@ -638,6 +691,18 @@ class Player {
                 this.cooldownReductionActive = false;
             }
         }
+        if (this.missileDoubleActive) {
+            this.missileDoubleTime -= deltaTime;
+            if (this.missileDoubleTime <= 0) {
+                this.missileDoubleActive = false;
+            }
+        }
+        if (this.rapidFireActive) {
+            this.rapidFireTime -= deltaTime;
+            if (this.rapidFireTime <= 0) {
+                this.rapidFireActive = false;
+            }
+        }
     }
     
     autoAttack(deltaTime, bullets, monsters) {
@@ -647,6 +712,7 @@ class Player {
         if (this.cooldownReductionActive) {
             cooldown *= 0.7;
         }
+        if (this.rapidFireActive) cooldown *= 0.3;
         
         if (currentTime - this.lastAttack > cooldown) {
             // 가장 가까운 몬스터 찾기
@@ -669,11 +735,19 @@ class Player {
                 const dy = closestMonster.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                bullets.push(new Bullet(
-                    this.x, this.y,
-                    dx / distance, dy / distance,
-                    this.weaponDamage
-                ));
+                if (this.missileDoubleActive) {
+                    // 2방향 공격(좌우)
+                    const angle1 = Math.atan2(dy, dx) + Math.PI / 8;
+                    const angle2 = Math.atan2(dy, dx) - Math.PI / 8;
+                    bullets.push(new Bullet(this.x, this.y, Math.cos(angle1), Math.sin(angle1), this.weaponDamage));
+                    bullets.push(new Bullet(this.x, this.y, Math.cos(angle2), Math.sin(angle2), this.weaponDamage));
+                } else {
+                    bullets.push(new Bullet(
+                        this.x, this.y,
+                        dx / distance, dy / distance,
+                        this.weaponDamage
+                    ));
+                }
                 
                 this.lastAttack = currentTime;
             }
@@ -720,6 +794,16 @@ class Player {
     activateCooldownReduction(duration) {
         this.cooldownReductionActive = true;
         this.cooldownReductionTime = duration;
+    }
+    
+    activateMissileDouble(duration) {
+        this.missileDoubleActive = true;
+        this.missileDoubleTime = duration;
+    }
+    
+    activateRapidFire(duration) {
+        this.rapidFireActive = true;
+        this.rapidFireTime = duration;
     }
     
     upgradeWeapon() {
@@ -997,20 +1081,19 @@ class Bullet {
 
 // XP 오브 클래스
 class XPOrb {
-    constructor(x, y, value) {
+    constructor(x, y, value, orbType = 1) {
         this.x = x;
         this.y = y;
         this.value = value;
-        this.radius = 6;
+        this.radius = 6 + orbType * 2; // 단계별 크기 차이
         this.collectRadius = 40;
+        this.type = orbType; // 1,2,3
     }
     
     update(deltaTime, player) {
-        // 자석 효과 또는 가까이 있을 때 플레이어 쪽으로 이동
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        
         if (player.magnetActive || distance < this.collectRadius) {
             const speed = player.magnetActive ? 300 : 200;
             this.x += (dx / distance) * speed * (deltaTime / 1000);
@@ -1019,16 +1102,23 @@ class XPOrb {
     }
     
     render(ctx) {
-        ctx.fillStyle = '#00ff00';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 반짝임 효과
-        ctx.fillStyle = '#88ff88';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius - 2, 0, Math.PI * 2);
-        ctx.fill();
+        const scale = 1.5;
+        const drawRadius = this.radius * scale;
+        const img = xpOrbImages[this.type - 1];
+        if (img && img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(
+                img,
+                this.x - drawRadius, this.y - drawRadius,
+                drawRadius * 2, drawRadius * 2
+            );
+        } else {
+            // fallback: 단계별 색상
+            const colors = ['#00ff00', '#ffaa00', '#00cfff'];
+            ctx.fillStyle = colors[this.type - 1] || '#00ff00';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, drawRadius, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 }
 
