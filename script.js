@@ -36,6 +36,14 @@ playerImages.up.src = 'img/kiki_up.png';
 playerImages.left.src = 'img/kiki_left.png';
 playerImages.right.src = 'img/kiki_right.png';
 
+// 1. 파일 상단에 배경 이미지 로딩
+const bgImage = new Image();
+bgImage.src = 'img/background.png';
+
+// 1. 파일 상단에 background2 이미지도 로딩
+const bgImage2 = new Image();
+bgImage2.src = 'img/background2.png';
+
 class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -211,22 +219,18 @@ class Game {
     }
     
     drawBackground() {
-        // 격자 패턴
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-        this.ctx.lineWidth = 1;
-        
-        for (let x = 0; x < this.canvas.width; x += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, this.canvas.height);
-            this.ctx.stroke();
+        // 스테이지 계산 (2분마다 1스테이지, 0~2: bgImage, 3이상: bgImage2)
+        const gameTime = Date.now() - this.gameStartTime;
+        const stage = Math.floor(gameTime / 120000);
+        let bg = bgImage;
+        if (stage >= 3 && bgImage2.complete && bgImage2.naturalWidth > 0) {
+            bg = bgImage2;
         }
-        
-        for (let y = 0; y < this.canvas.height; y += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(this.canvas.width, y);
-            this.ctx.stroke();
+        if (bg.complete && bg.naturalWidth > 0) {
+            this.ctx.drawImage(bg, 0, 0, this.canvas.width, this.canvas.height);
+        } else {
+            this.ctx.fillStyle = '#001122';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
     
