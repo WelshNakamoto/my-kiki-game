@@ -895,47 +895,45 @@ class Monster {
             ctx.globalAlpha = 0.5;
             ctx.filter = 'hue-rotate(180deg)';
         }
-        const scale = 1.5;
-        const drawSize = this.radius * 2 * scale;
         // 이미지가 있으면 drawImage, 아니면 도형 fallback
         const img = monsterImages[this.type];
         if (img && img.complete && img.naturalWidth > 0) {
             ctx.drawImage(
                 img,
-                this.x - drawSize / 2, this.y - drawSize / 2,
-                drawSize, drawSize
+                this.x - this.radius, this.y - this.radius,
+                this.radius * 2, this.radius * 2
             );
         } else {
-            // 기존 도형 fallback (크기도 1.5배)
+            // 기존 도형 fallback
             switch (this.type) {
                 case 'normal': case 'fast': case 'mini':
                     ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius * scale, 0, Math.PI * 2);
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                     ctx.fill();
                     break;
                 case 'tank':
                     ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.rect(this.x - this.radius * scale, this.y - this.radius * scale, this.radius * 2 * scale, this.radius * 2 * scale);
+                    ctx.rect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
                     ctx.fill();
                     break;
                 case 'elite':
                     ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.moveTo(this.x, this.y - this.radius * scale);
-                    ctx.lineTo(this.x + this.radius * scale, this.y);
-                    ctx.lineTo(this.x, this.y + this.radius * scale);
-                    ctx.lineTo(this.x - this.radius * scale, this.y);
+                    ctx.moveTo(this.x, this.y - this.radius);
+                    ctx.lineTo(this.x + this.radius, this.y);
+                    ctx.lineTo(this.x, this.y + this.radius);
+                    ctx.lineTo(this.x - this.radius, this.y);
                     ctx.closePath();
                     ctx.fill();
                     break;
                 case 'spiky':
                     ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.moveTo(this.x, this.y - this.radius * scale);
-                    ctx.lineTo(this.x + this.radius * scale, this.y + this.radius * scale);
-                    ctx.lineTo(this.x - this.radius * scale, this.y + this.radius * scale);
+                    ctx.moveTo(this.x, this.y - this.radius);
+                    ctx.lineTo(this.x + this.radius, this.y + this.radius);
+                    ctx.lineTo(this.x - this.radius, this.y + this.radius);
                     ctx.closePath();
                     ctx.fill();
                     break;
@@ -943,19 +941,19 @@ class Monster {
                     ctx.globalAlpha *= 0.5;
                     ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius * scale, Math.PI, 0, false);
-                    ctx.lineTo(this.x + this.radius * scale, this.y);
-                    ctx.arc(this.x, this.y, this.radius * scale, 0, Math.PI, true);
+                    ctx.arc(this.x, this.y, this.radius, Math.PI, 0, false);
+                    ctx.lineTo(this.x + this.radius, this.y);
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI, true);
                     ctx.closePath();
                     ctx.fill();
                     break;
             }
         }
-        // HP바 (크기는 기존대로)
+        // HP바
         if (this.hp < this.maxHp) {
-            const barWidth = this.radius * 2 * scale;
+            const barWidth = this.radius * 2;
             const barHeight = 4;
-            const barY = this.y - this.radius * scale - 8;
+            const barY = this.y - this.radius - 8;
             ctx.fillStyle = '#000000';
             ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
             ctx.fillStyle = '#ff0000';
