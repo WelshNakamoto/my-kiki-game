@@ -106,6 +106,9 @@ class Game {
         // 아이템 목록 초기화
         this.initializeItemList();
         
+        this.lastRandomItemTime = Date.now();
+        this.nextRandomItemInterval = 10000 + Math.random() * 5000; // 10~15초
+        
         this.init();
     }
     
@@ -199,7 +202,7 @@ class Game {
         this.player.update(deltaTime, this.keys);
         
         // 자동 공격
-        this.player.autoAttack(deltaTime, this.bullets, this.monsters);
+        this.player.autoAttack(deltaTime, this.bullets, this.monsters, this);
         
         // 몬스터 스폰
         this.spawnMonsters(gameTime);
@@ -239,6 +242,14 @@ class Game {
         if (gameTime >= 600000) { // 10분
             this.showGameClearModal();
         }
+        
+        // 랜덤 바닥 아이템 생성
+        const now = Date.now();
+        if (now - this.lastRandomItemTime > this.nextRandomItemInterval) {
+            this.spawnRandomGroundItem();
+            this.lastRandomItemTime = now;
+            this.nextRandomItemInterval = 10000 + Math.random() * 5000;
+        }
     }
     
     render() {
@@ -277,15 +288,17 @@ class Game {
     spawnMonsters(gameTime) {
         if (gameTime - this.lastMonsterSpawn > this.monsterSpawnRate) {
             this.lastMonsterSpawn = gameTime;
-            
             // 시간에 따른 난이도 조정
             const stage = Math.floor(gameTime / 120000); // 2분마다 스테이지 증가
-            const monsterCount = Math.min(1 + Math.floor(stage / 2), 3);
-            
+            // 레벨에 따라 몬스터 수 증가
+            let levelBonus = 0;
+            if (this.player && this.player.level) {
+                levelBonus = Math.floor((this.player.level - 1) / 2); // 2레벨마다 1마리 추가
+            }
+            const monsterCount = Math.min(1 + Math.floor(stage / 2) + levelBonus, 10); // 최대 10마리까지
             for (let i = 0; i < monsterCount; i++) {
                 this.createMonster(stage);
             }
-            
             // 스폰 간격 감소
             this.monsterSpawnRate = Math.max(500, 2000 - stage * 200);
         }
@@ -323,19 +336,19 @@ class Game {
                 if (this.checkCollision(bullet, monster)) {
                     // 데미지 처리
                     monster.takeDamage(bullet.damage);
+                    // 미사일 터짐 임팩트(미사일 위치)
+                    this.createParticles(bullet.x, bullet.y, '#ffff88');
                     this.bullets.splice(i, 1);
-                    
                     // 몬스터 사망 처리
                     if (monster.hp <= 0) {
                         this.createXPOrb(monster.x, monster.y, monster.xpValue, monster.type);
+                        // 몬스터 위치 임팩트
                         this.createParticles(monster.x, monster.y, '#ff4444');
                         this.score += monster.scoreValue;
-                        
                         // 아이템 드롭
                         if (Math.random() < this.itemDropChance) {
                             this.createItem(monster.x, monster.y);
                         }
-                        
                         this.monsters.splice(j, 1);
                     }
                     break;
@@ -406,10 +419,10 @@ class Game {
                 this.player.heal(Math.floor(this.player.maxHp * 0.3));
                 break;
             case 'magnet':
-                this.player.activateMagnet(5000);
+                this.player.activateMagnet(10000);
                 break;
             case 'shield':
-                this.player.activateShield(5000);
+                this.player.activateShield(8000);
                 break;
             case 'weapon_upgrade':
                 this.player.upgradeWeapon();
@@ -602,6 +615,14 @@ class Game {
             this.isPaused = !this.isPaused;
         }
     }
+    
+    spawnRandomGroundItem() {
+        // 바닥의 랜덤 위치에 아이템 생성
+        const margin = 40;
+        const x = margin + Math.random() * (this.canvas.width - margin * 2);
+        const y = margin + Math.random() * (this.canvas.height - margin * 2);
+        this.createItem(x, y);
+    }
 }
 
 // 플레이어 클래스
@@ -609,7 +630,7 @@ class Player {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.radius = 15;
+        this.radius = 21;
         this.speed = 200;
         this.hp = 100;
         this.maxHp = 100;
@@ -705,7 +726,7 @@ class Player {
         }
     }
     
-    autoAttack(deltaTime, bullets, monsters) {
+    autoAttack(deltaTime, bullets, monsters, game) {
         const currentTime = Date.now();
         let cooldown = this.attackCooldown;
         
@@ -723,7 +744,6 @@ class Player {
                 const dx = monster.x - this.x;
                 const dy = monster.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                
                 if (distance < closestDistance) {
                     closestDistance = distance;
                     closestMonster = monster;
@@ -734,13 +754,29 @@ class Player {
                 const dx = closestMonster.x - this.x;
                 const dy = closestMonster.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                
                 if (this.missileDoubleActive) {
-                    // 2방향 공격(좌우)
-                    const angle1 = Math.atan2(dy, dx) + Math.PI / 8;
-                    const angle2 = Math.atan2(dy, dx) - Math.PI / 8;
-                    bullets.push(new Bullet(this.x, this.y, Math.cos(angle1), Math.sin(angle1), this.weaponDamage));
-                    bullets.push(new Bullet(this.x, this.y, Math.cos(angle2), Math.sin(angle2), this.weaponDamage));
+                    // 가까운 몬스터 2마리 추적 유도탄
+                    let targets = [];
+                    if (monsters.length === 1) {
+                        targets = [monsters[0], monsters[0]];
+                    } else {
+                        // 거리순 정렬 후 2마리
+                        targets = monsters.slice().sort((a, b) => {
+                            const da = Math.hypot(a.x - this.x, a.y - this.y);
+                            const db = Math.hypot(b.x - this.x, b.y - this.y);
+                            return da - db;
+                        }).slice(0, 2);
+                    }
+                    targets.forEach(target => {
+                        const tdx = target.x - this.x;
+                        const tdy = target.y - this.y;
+                        const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
+                        bullets.push(new Bullet(
+                            this.x, this.y,
+                            tdx / tdist, tdy / tdist,
+                            this.weaponDamage
+                        ));
+                    });
                 } else {
                     bullets.push(new Bullet(
                         this.x, this.y,
@@ -748,7 +784,7 @@ class Player {
                         this.weaponDamage
                     ));
                 }
-                
+                // (kiki 위치 임팩트 파티클 제거)
                 this.lastAttack = currentTime;
             }
         }
@@ -1061,7 +1097,7 @@ class Bullet {
         this.y = y;
         this.dirX = dirX;
         this.dirY = dirY;
-        this.speed = 400;
+        this.speed = 720;
         this.radius = 3;
         this.damage = damage;
     }
