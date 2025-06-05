@@ -54,10 +54,38 @@ xpOrbImages[0].src = 'img/kiki_logo.png';
 xpOrbImages[1].src = 'img/stacks_logo.png';
 xpOrbImages[2].src = 'img/sbtc_logo.png';
 
+// 1. 파일 상단에 아이템 이미지 매핑 추가
+const itemImages = {
+  heal: new Image(),
+  magnet: new Image(),
+  shield: new Image(),
+  weapon_upgrade: new Image(),
+  speed: new Image(),
+  cooldown: new Image(),
+  bomb: new Image(),
+  timestop: new Image(),
+  random_box: new Image(),
+  coin: new Image(),
+  missile_double: new Image(),
+  rapid_fire: new Image()
+};
+itemImages.heal.src = 'img/item/item_heal.png';
+itemImages.magnet.src = 'img/item/item_magnet.png';
+itemImages.shield.src = 'img/item/item_shield.png';
+itemImages.weapon_upgrade.src = 'img/item/item_weapon.png';
+itemImages.speed.src = 'img/item/item_speed.png';
+itemImages.cooldown.src = 'img/item/item_cooldown.png';
+itemImages.bomb.src = 'img/item/item_bomb.png';
+itemImages.timestop.src = 'img/item/item_timestop.png';
+itemImages.random_box.src = 'img/item/item_random.png';
+itemImages.coin.src = 'img/item/item_coin.png';
+itemImages.missile_double.src = 'img/item/item_missile.png';
+itemImages.rapid_fire.src = 'img/item/item_rapid.png';
+
 const itemDescriptions = [
   { name: "체력 회복", desc: "HP 30% 회복" },
-  { name: "자석", desc: "5초간 XP(포인트) 자동 수집" },
-  { name: "쉴드", desc: "5초간 무적" },
+  { name: "자석", desc: "10초간 XP(포인트) 자동 수집" },
+  { name: "쉴드", desc: "8초간 무적" },
   { name: "무기 강화", desc: "무기 1레벨 강화(공격력 증가)" },
   { name: "이동속도", desc: "5초간 이동속도 20% 증가" },
   { name: "쿨타임 감소", desc: "5초간 공격 쿨타임 30% 감소(공격속도 증가)" },
@@ -65,8 +93,8 @@ const itemDescriptions = [
   { name: "시간정지", desc: "3초간 모든 몬스터 정지" },
   { name: "랜덤상자", desc: "무작위 아이템 1개 지급" },
   { name: "코인", desc: "점수/코인 획득" },
-  { name: "더블 미사일", desc: "5초간 미사일 2개 발사(2방향 공격)" },
-  { name: "연사", desc: "5초간 연사(자동공격 속도 대폭 증가)" }
+  { name: "더블 미사일", desc: "5초간 미사일 2개 발사(2마리 몬스터 추적)" },
+  { name: "연사", desc: "10초간 연사(자동공격 속도 대폭 증가, 미사일 속도 2배)" }
 ];
 
 class Game {
@@ -449,7 +477,7 @@ class Game {
                 this.player.activateMissileDouble(5000);
                 break;
             case 'rapid_fire':
-                this.player.activateRapidFire(5000);
+                this.player.activateRapidFire(10000);
                 break;
         }
     }
@@ -760,7 +788,6 @@ class Player {
                     if (monsters.length === 1) {
                         targets = [monsters[0], monsters[0]];
                     } else {
-                        // 거리순 정렬 후 2마리
                         targets = monsters.slice().sort((a, b) => {
                             const da = Math.hypot(a.x - this.x, a.y - this.y);
                             const db = Math.hypot(b.x - this.x, b.y - this.y);
@@ -774,14 +801,16 @@ class Player {
                         bullets.push(new Bullet(
                             this.x, this.y,
                             tdx / tdist, tdy / tdist,
-                            this.weaponDamage
+                            this.weaponDamage,
+                            this.rapidFireActive
                         ));
                     });
                 } else {
                     bullets.push(new Bullet(
                         this.x, this.y,
                         dx / distance, dy / distance,
-                        this.weaponDamage
+                        this.weaponDamage,
+                        this.rapidFireActive
                     ));
                 }
                 // (kiki 위치 임팩트 파티클 제거)
@@ -1092,12 +1121,12 @@ class Monster {
 
 // 총알 클래스
 class Bullet {
-    constructor(x, y, dirX, dirY, damage) {
+    constructor(x, y, dirX, dirY, damage, isRapid = false) {
         this.x = x;
         this.y = y;
         this.dirX = dirX;
         this.dirY = dirY;
-        this.speed = 720;
+        this.speed = isRapid ? 1440 : 720;
         this.radius = 3;
         this.damage = damage;
     }
@@ -1177,32 +1206,39 @@ class Item {
     render(ctx) {
         const pulse = Math.sin(this.pulseTime / 200) * 0.2 + 1;
         const currentRadius = this.radius * pulse;
-        
         ctx.save();
-        
-        // 아이템별 색상
-        switch (this.type) {
-            case 'heal': ctx.fillStyle = '#ff4444'; break;
-            case 'magnet': ctx.fillStyle = '#4444ff'; break;
-            case 'shield': ctx.fillStyle = '#44ffff'; break;
-            case 'weapon_upgrade': ctx.fillStyle = '#ff8800'; break;
-            case 'speed': ctx.fillStyle = '#44ff44'; break;
-            case 'cooldown': ctx.fillStyle = '#ff44ff'; break;
-            case 'bomb': ctx.fillStyle = '#ffff00'; break;
-            case 'timestop': ctx.fillStyle = '#8844ff'; break;
-            case 'random_box': ctx.fillStyle = '#ffffff'; break;
-            case 'coin': ctx.fillStyle = '#ffaa00'; break;
+        // 아이템 이미지가 있으면 drawImage, 없으면 도형 fallback
+        const img = itemImages[this.type];
+        if (img && img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(
+                img,
+                this.x - currentRadius, this.y - currentRadius,
+                currentRadius * 2, currentRadius * 2
+            );
+        } else {
+            // 기존 도형 fallback
+            switch (this.type) {
+                case 'heal': ctx.fillStyle = '#ff4444'; break;
+                case 'magnet': ctx.fillStyle = '#4444ff'; break;
+                case 'shield': ctx.fillStyle = '#44ffff'; break;
+                case 'weapon_upgrade': ctx.fillStyle = '#ff8800'; break;
+                case 'speed': ctx.fillStyle = '#44ff44'; break;
+                case 'cooldown': ctx.fillStyle = '#ff44ff'; break;
+                case 'bomb': ctx.fillStyle = '#ffff00'; break;
+                case 'timestop': ctx.fillStyle = '#8844ff'; break;
+                case 'random_box': ctx.fillStyle = '#ffffff'; break;
+                case 'coin': ctx.fillStyle = '#ffaa00'; break;
+            }
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
+            ctx.fill();
         }
-        
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
-        ctx.fill();
-        
         // 테두리
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
         ctx.stroke();
-        
         ctx.restore();
     }
 }
