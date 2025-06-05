@@ -370,8 +370,8 @@ class Game {
                     // 몬스터 사망 처리
                     if (monster.hp <= 0) {
                         this.createXPOrb(monster.x, monster.y, monster.xpValue, monster.type);
-                        // 몬스터 위치 임팩트
-                        this.createParticles(monster.x, monster.y, '#ff4444');
+                        // 몬스터 위치 초간단 소형 폭발(노랑 파티클 1개)
+                        this.particles.push(new Particle(monster.x, monster.y, '#ffaa00'));
                         this.score += monster.scoreValue;
                         // 아이템 드롭
                         if (Math.random() < this.itemDropChance) {
@@ -433,9 +433,16 @@ class Game {
         this.items.push(new Item(x, y, type));
     }
     
-    createParticles(x, y, color) {
-        for (let i = 0; i < 8; i++) {
-            this.particles.push(new Particle(x, y, color));
+    createParticles(x, y, colorOrColors) {
+        // colorOrColors가 배열이면 여러 색상 파티클, 아니면 단일 색상
+        if (Array.isArray(colorOrColors)) {
+            for (let i = 0; i < colorOrColors.length; i++) {
+                this.particles.push(new Particle(x, y, colors[i]));
+            }
+        } else {
+            for (let i = 0; i < 8; i++) {
+                this.particles.push(new Particle(x, y, colorOrColors));
+            }
         }
     }
     
@@ -1153,6 +1160,12 @@ class XPOrb {
         this.radius = 6 + orbType * 2; // 단계별 크기 차이
         this.collectRadius = 40;
         this.type = orbType; // 1,2,3
+        // 포인트 오브 생성 특수효과(아이템과 동일한 원형 외곽선, 색상만 다르게)
+        this.ringPulseTime = 0;
+        // 오브별 외곽선 색상 지정
+        const ringColors = ['#ffe066', '#ffaa00', '#00cfff'];
+        this.effectRingColor = ringColors[this.type - 1] || '#ffe066';
+        // 기존 파티클 효과 제거
     }
     
     update(deltaTime, player) {
@@ -1164,11 +1177,13 @@ class XPOrb {
             this.x += (dx / distance) * speed * (deltaTime / 1000);
             this.y += (dy / distance) * speed * (deltaTime / 1000);
         }
+        // 외곽선 효과 애니메이션 타이머
+        this.ringPulseTime += deltaTime;
     }
     
     render(ctx) {
-        const scale = 1.5;
-        const drawRadius = this.radius * scale;
+        // 모든 XP 오브 이미지를 동일한 크기로 고정 (28x28)
+        const drawRadius = 14;
         const img = xpOrbImages[this.type - 1];
         if (img && img.complete && img.naturalWidth > 0) {
             ctx.drawImage(
@@ -1184,6 +1199,16 @@ class XPOrb {
             ctx.arc(this.x, this.y, drawRadius, 0, Math.PI * 2);
             ctx.fill();
         }
+        // 아이템과 유사한 외곽선 특수효과(색상만 다르게)
+        ctx.save();
+        const pulse = Math.sin(this.ringPulseTime / 200) * 0.2 + 1.1;
+        ctx.strokeStyle = this.effectRingColor;
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, drawRadius * pulse, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
     }
 }
 
@@ -1193,7 +1218,7 @@ class Item {
         this.x = x;
         this.y = y;
         this.type = type;
-        this.radius = 12;
+        this.radius = 14.4; // 기존 12에서 20% 증가
         this.life = 30000; // 30초 후 사라짐
         this.pulseTime = 0;
     }
@@ -1233,12 +1258,17 @@ class Item {
             ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
             ctx.fill();
         }
-        // 테두리
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
+        // 사각형 특수효과
+        ctx.save();
+        const squarePulse = Math.sin(this.pulseTime / 200) * 0.2 + 1.1;
+        ctx.strokeStyle = '#66ccff'; // 파란색 계열
+        ctx.lineWidth = 2.5;
+        ctx.globalAlpha = 0.8;
+        const side = currentRadius * squarePulse * 2;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
+        ctx.rect(this.x - side/2, this.y - side/2, side, side);
         ctx.stroke();
+        ctx.restore();
         ctx.restore();
     }
 }
@@ -1253,7 +1283,7 @@ class Particle {
         this.life = 1000;
         this.maxLife = 1000;
         this.color = color;
-        this.radius = Math.random() * 3 + 1;
+        this.radius = Math.random() * 1 + 1; // 1~2로 작게
     }
     
     update(deltaTime) {
