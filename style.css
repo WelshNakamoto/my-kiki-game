@@ -452,11 +452,11 @@ button:hover {
   margin: 0;
   border-radius: 50%;
   border: 2px solid #444;
-  background: rgba(30,30,50,0.85);
+  background: rgba(30,30,50,0.4);
   color: #ffe066;
   font-size: 2rem;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   outline: none;
   touch-action: none;
   position: absolute;
@@ -464,6 +464,10 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s;
+}
+#mobileDPad .dpad-btn:active {
+  background: rgba(30,30,50,0.7);
 }
 #mobileDPad #dpad-up    { left: 52px; top: 0; }
 #mobileDPad #dpad-down  { left: 52px; top: 104px; }
