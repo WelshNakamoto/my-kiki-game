@@ -428,4 +428,44 @@ button:hover {
     background: none;
     border: none;
     box-shadow: none;
+}
+
+#mobileDPad {
+  display: block !important;
+  position: fixed;
+  left: 16px;
+  bottom: 32px;
+  z-index: 2000;
+  user-select: none;
+  width: 160px;
+  height: 160px;
+  pointer-events: auto !important;
+}
+#mobileDPad .dpad-btn {
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px solid #444;
+  background: rgba(30,30,50,0.85);
+  color: #ffe066;
+  font-size: 2rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  outline: none;
+  touch-action: none;
+  position: absolute;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#mobileDPad #dpad-up    { left: 52px; top: 0; }
+#mobileDPad #dpad-down  { left: 52px; top: 104px; }
+#mobileDPad #dpad-left  { left: 0; top: 52px; }
+#mobileDPad #dpad-right { left: 104px; top: 52px; }
+#mobileDPad .dpad-middle-row, #mobileDPad .dpad-center { display: none; }
+
+@media (max-width: 900px) {
+  #mobileDPad { display: block; }
 } 

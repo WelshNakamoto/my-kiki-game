@@ -165,10 +165,12 @@ class Game {
             if (e.key === 'Escape') {
                 this.togglePause();
             }
+            console.log('keyboard down:', e.key, JSON.stringify(this.keys));
         });
         
         document.addEventListener('keyup', (e) => {
             this.keys[e.key.toLowerCase()] = false;
+            console.log('keyboard up:', e.key, JSON.stringify(this.keys));
         });
         
         // 레벨업 버튼 이벤트
@@ -225,6 +227,9 @@ class Game {
         
         // UI 업데이트
         this.updateUI(gameTime);
+        
+        // 디버깅: 현재 keys 상태 출력
+        console.log('Game.update keys:', JSON.stringify(this.keys));
         
         // 플레이어 업데이트
         this.player.update(deltaTime, this.keys);
@@ -1304,8 +1309,78 @@ class Particle {
     }
 }
 
+// 모바일 방향키(가상 D-Pad) 지원
+function triggerKey(key, isDown) {
+  // 실제 게임 객체의 keys를 직접 조작
+  if (window.game && game.keys) {
+    switch (key.toLowerCase()) {
+      case 'arrowup':
+        game.keys['arrowup'] = isDown;
+        game.keys['w'] = isDown;
+        break;
+      case 'arrowdown':
+        game.keys['arrowdown'] = isDown;
+        game.keys['s'] = isDown;
+        break;
+      case 'arrowleft':
+        game.keys['arrowleft'] = isDown;
+        game.keys['a'] = isDown;
+        break;
+      case 'arrowright':
+        game.keys['arrowright'] = isDown;
+        game.keys['d'] = isDown;
+        break;
+    }
+    console.log('game.keys:', JSON.stringify(game.keys));
+  }
+}
+function setupMobileDPad() {
+  const map = {
+    'dpad-up': 'arrowup',
+    'dpad-down': 'arrowdown',
+    'dpad-left': 'arrowleft',
+    'dpad-right': 'arrowright'
+  };
+  Object.keys(map).forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    let pressed = false;
+    btn.addEventListener('touchstart', e => {
+      e.preventDefault();
+      if (!pressed) {
+        triggerKey(map[id], true);
+        pressed = true;
+      }
+    });
+    btn.addEventListener('touchend', e => {
+      e.preventDefault();
+      triggerKey(map[id], false);
+      pressed = false;
+    });
+    btn.addEventListener('mousedown', e => {
+      e.preventDefault();
+      if (!pressed) {
+        triggerKey(map[id], true);
+        pressed = true;
+      }
+    });
+    btn.addEventListener('mouseup', e => {
+      e.preventDefault();
+      triggerKey(map[id], false);
+      pressed = false;
+    });
+    btn.addEventListener('mouseleave', e => {
+      if (pressed) {
+        triggerKey(map[id], false);
+        pressed = false;
+      }
+    });
+  });
+}
+
 // 게임 시작
-let game;
+var game;
 window.addEventListener('load', () => {
     game = new Game();
+    setupMobileDPad(); // D-Pad 바인딩을 game 생성 이후에 실행
 }); 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 서바이벌 캣: 키키의 밤</title>
+    <title>🎮 Ver.3 서바이벌 캣: 키키의 밤</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
         <!-- 상단 UI: KIKI 현황 + 아이템/버프 현황 -->
         <div id="statusBar">
           <div class="infoPanel">
-            <h3 class="info-title">kiki 현황</h3>
+            <h3 class="info-title">KIKI 현황</h3>
             <div class="bar-group">
               <div class="bar-label" id="healthText">HP: 100/100</div>
               <div class="bar-bg"><div class="bar-fill" id="healthFill"></div></div>
@@ -91,6 +91,14 @@
         <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; color: white; font-size: 18px;">
             🎮 게임 로딩 중...
         </div>
+
+        <!-- 모바일 전용 십자 방향키 -->
+        <div id="mobileDPad">
+          <button class="dpad-btn" id="dpad-up">▲</button>
+          <button class="dpad-btn" id="dpad-left">◀</button>
+          <button class="dpad-btn" id="dpad-right">▶</button>
+          <button class="dpad-btn" id="dpad-down">▼</button>
+        </div>
     </div>
 
     <script>
@@ -116,6 +124,19 @@
                 document.getElementById('loading').innerHTML = '❌ script.js 파일을 찾을 수 없습니다!<br><button onclick="location.reload()">새로고침</button>';
             };
             document.head.appendChild(script);
+        });
+
+        // 모바일 전용 십자 방향키 이벤트 추가
+        const dpadButtons = document.querySelectorAll('.dpad-btn');
+        dpadButtons.forEach(btn => {
+            btn.addEventListener('mousedown', e => {
+                e.preventDefault();
+                console.log('mousedown', btn.id);
+            });
+            btn.addEventListener('mouseup', e => {
+                e.preventDefault();
+                console.log('mouseup', btn.id);
+            });
         });
     </script>
 </body>
