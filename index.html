@@ -8,43 +8,33 @@
 </head>
 <body>
     <div id="gameContainer">
-        <!-- 좌측 업그레이드/버프 정보 -->
-        <div id="leftInfoPanel">
+        <!-- 상단 UI: KIKI 현황 + 아이템/버프 현황 -->
+        <div id="statusBar">
+          <div class="infoPanel">
+            <h3 class="info-title">kiki 현황</h3>
+            <div class="bar-group">
+              <div class="bar-label" id="healthText">HP: 100/100</div>
+              <div class="bar-bg"><div class="bar-fill" id="healthFill"></div></div>
+            </div>
+            <span id="timeDisplay" class="info-time">시간: 00:00</span>
+            <span id="levelDisplay">레벨: 1</span>
+            <div class="bar-group">
+              <div class="bar-label" id="expText">XP: 0/100</div>
+              <div class="bar-bg"><div class="bar-fill xp" id="expFill"></div></div>
+            </div>
+            <span id="scoreDisplay">점수: 0</span>
+          </div>
+          <div id="upgradeBuffPanel">
             <h3>내 업그레이드/버프</h3>
             <div id="upgradeInfo">
-                <div>무기 강화: <span id="upgradeWeapon">0</span>회</div>
-                <div>체력 증가: <span id="upgradeHp">0</span>회</div>
-                <div>이동속도: <span id="upgradeSpeed">0</span>회</div>
+              <div>무기 강화: <span id="upgradeWeapon">0</span>회</div>
+              <div>체력 증가: <span id="upgradeHp">0</span>회</div>
+              <div>이동속도: <span id="upgradeSpeed">0</span>회</div>
             </div>
-            <div id="buffInfo">
-                <!-- 버프 정보 동적 표시 -->
-            </div>
+            <div id="buffInfo"></div>
+          </div>
         </div>
-        <!-- 아이템 설명 패널 -->
-        <div id="itemInfoPanel">
-            <h3>아이템 설명</h3>
-            <ul id="itemList"></ul>
-        </div>
-
-        <!-- 상단 UI -->
-        <div id="topUI">
-            <div id="leftUI">
-                <div id="healthBar">
-                    <div id="healthFill"></div>
-                    <span id="healthText">HP: 100/100</span>
-                </div>
-                <div id="expBar">
-                    <div id="expFill"></div>
-                    <span id="expText">XP: 0/100</span>
-                </div>
-            </div>
-            <div id="rightUI">
-                <div id="timeDisplay">시간: 00:00</div>
-                <div id="levelDisplay">레벨: 1</div>
-                <div id="scoreDisplay">점수: 0</div>
-            </div>
-        </div>
-
+        
         <!-- 게임 캔버스 -->
         <canvas id="gameCanvas" width="800" height="600"></canvas>
 

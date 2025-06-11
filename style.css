@@ -23,81 +23,152 @@ body {
     position: relative;
 }
 
-/* 상단 UI */
-#topUI {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    right: 20px;
+/* 상단 통합 status bar */
+#statusBar {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 18px 24px 18px 24px;
+    background: rgba(20, 20, 40, 0.92);
+    border-radius: 16px;
+    margin-bottom: 28px;
+    position: static;
+    top: unset;
+    left: unset;
+    right: unset;
     z-index: 100;
+    overflow-x: auto;
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.35);
+    border: 2.5px solid #3a3a55;
 }
-
-#leftUI, #rightUI {
+.status-left, .status-center, .status-right {
     display: flex;
     flex-direction: column;
+    gap: 8px;
+}
+.status-left {
+    align-items: flex-start;
     gap: 10px;
 }
-
-/* 체력바 */
-#healthBar, #expBar {
-    position: relative;
-    width: 200px;
-    height: 25px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid #555;
-    border-radius: 12px;
-    overflow: hidden;
+.status-left .bar-group:first-child {
+    margin-bottom: 2px;
 }
-
-#healthFill {
-    height: 100%;
-    background: linear-gradient(90deg, #ff4444, #ff6666);
-    transition: width 0.3s ease;
-    width: 100%;
-}
-
-#expFill {
-    height: 100%;
-    background: linear-gradient(90deg, #4444ff, #6666ff);
-    transition: width 0.3s ease;
-    width: 0%;
-}
-
-#healthText, #expText {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 12px;
+#healthText {
+    font-size: 15px;
     font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    pointer-events: none;
+    color: #fff;
+    margin-bottom: 2px;
 }
-
-/* 우측 UI */
-#rightUI div {
-    background: rgba(0, 0, 0, 0.7);
-    padding: 8px 15px;
-    border-radius: 8px;
-    border: 1px solid #555;
-    font-weight: bold;
-    text-align: center;
-    min-width: 120px;
-}
-
 #timeDisplay {
     color: #ffff44;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 6px;
 }
+.status-right {
+    align-items: flex-end;
+    min-width: 180px;
+}
+.bar-group {
+    width: 160px;
+}
+.bar-bg {
+    background: #222;
+    border-radius: 8px;
+    height: 16px;
+    width: 100%;
+    margin-bottom: 2px;
+    overflow: hidden;
+}
+.bar-fill {
+    background: #ff5a5a;
+    height: 100%;
+    width: 84%;
+    transition: width 0.2s;
+}
+.bar-fill.xp { background: #4444ff; }
+.bar-label { font-size: 13px; color: #fff; margin-bottom: 2px; }
 
-#levelDisplay {
+#upgradeBuffPanel {
+    border: 2px solid #444;
+    background: rgba(30, 30, 50, 0.92);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+}
+#upgradeBuffPanel h3 {
+    font-size: 15px;
+    margin-bottom: 6px;
+    color: #ffe066;
+    text-align: left;
+}
+#upgradeInfo div {
+    margin-bottom: 3px;
+    color: #fff;
+    font-size: 13px;
+}
+#buffInfo {
+    margin-top: 7px;
+}
+.buff-active {
     color: #44ff44;
+    font-weight: bold;
+}
+.buff-inactive {
+    color: #aaa;
 }
 
-#scoreDisplay {
-    color: #ff44ff;
+/* 기존 #leftInfoPanel 제거 */
+#leftInfoPanel { display: none !important; }
+
+@media (max-width: 600px) {
+    #statusBar {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 8px 4px 8px 4px;
+        margin-bottom: 12px;
+    }
+    .status-left, .status-center, .status-right {
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 6px;
+    }
+    .status-right {
+        min-width: unset;
+        width: auto;
+        flex-direction: row;
+        align-items: flex-start;
+        margin-left: 8px;
+    }
+    .infoPanel, #upgradeBuffPanel {
+        min-width: 180px;
+        max-width: 320px;
+        font-size: 12px;
+        padding: 7px 7px 5px 7px;
+        margin: 0;
+        flex: 1 1 180px;
+    }
+    #upgradeInfo {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    #upgradeInfo div {
+        margin-bottom: 0;
+        white-space: nowrap;
+    }
+    #buffInfo {
+        margin-top: 4px;
+    }
+    .infoPanel span, .infoPanel .bar-label { font-size: 12px; }
+    .info-title { font-size: 13px; margin-bottom: 4px; }
 }
+
+/* 기존 상단 UI 스타일 제거(덮어쓰기) */
+#topUI, #leftUI, #rightUI, #healthBar, #expBar { display: none !important; }
+#healthText, #expText, #levelDisplay, #scoreDisplay { position: static; transform: none; font-size: 13px; font-weight: bold; text-shadow: none; }
 
 /* 게임 캔버스 */
 #gameCanvas {
@@ -225,14 +296,19 @@ button:hover {
         height: 60vh;
     }
     
-    #topUI {
+    #statusBar {
         flex-direction: column;
-        gap: 10px;
+        align-items: stretch;
+        gap: 6px;
     }
     
-    #leftUI, #rightUI {
-        width: 100%;
+    .status-left, .status-center, .status-right {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 8px;
     }
+    
+    .bar-group { width: 100px; }
     
     #upgradeOptions {
         flex-direction: column;
@@ -254,41 +330,6 @@ button:hover {
 
 .item-pulse {
     animation: itemPulse 0.5s ease-in-out;
-}
-
-#leftInfoPanel {
-    position: absolute;
-    top: 120px;
-    left: 20px;
-    width: 180px;
-    background: rgba(20, 20, 40, 0.85);
-    border: 2px solid #444;
-    border-radius: 12px;
-    padding: 15px 15px 10px 15px;
-    z-index: 120;
-    color: #fff;
-    font-size: 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-#leftInfoPanel h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-    color: #ffe066;
-    text-align: left;
-}
-#upgradeInfo div {
-    margin-bottom: 4px;
-    color: #fff;
-}
-#buffInfo {
-    margin-top: 10px;
-}
-.buff-active {
-    color: #44ff44;
-    font-weight: bold;
-}
-.buff-inactive {
-    color: #aaa;
 }
 
 #itemInfoPanel {
@@ -322,4 +363,66 @@ button:hover {
 #itemList .item-name {
     color: #ffe066;
     font-weight: bold;
+}
+
+.status-center { display: none !important; }
+
+.infoPanel {
+    border: 2px solid #444;
+    background: rgba(30, 30, 50, 0.92);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+}
+.infoPanel .bar-group { width: 100%; }
+.infoPanel span { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+
+@media (max-width: 600px) {
+    .infoPanel {
+        min-width: 160px;
+        font-size: 12px;
+        padding: 7px 7px 5px 7px;
+    }
+    .infoPanel span { font-size: 12px; }
+}
+
+.info-title {
+    font-size: 16px;
+    color: #ffe066;
+    font-weight: bold;
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+@media (max-width: 600px) {
+    #statusBar {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .status-left, .status-right {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .infoPanel, #upgradeBuffPanel {
+        min-width: unset;
+        width: auto;
+        font-size: 12px;
+        padding: 7px 7px 5px 7px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .infoPanel span, .infoPanel .bar-label { font-size: 12px; }
+    .info-title { font-size: 13px; margin-bottom: 4px; }
+}
+
+.infoPanel, #upgradeBuffPanel {
+    min-width: 260px;
+    max-width: 420px;
+    flex: 1 1 260px;
+    margin: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
 } 
