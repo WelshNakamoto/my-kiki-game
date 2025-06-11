@@ -11,6 +11,8 @@ body {
     color: #ffffff;
     overflow: hidden;
     user-select: none;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
 #gameContainer {
@@ -480,8 +482,10 @@ button:hover {
   font-weight: bold;
   color: #e06666;
   letter-spacing: 1px;
-  margin-top: 18px;
+  margin-top: 0 !important;
   margin-bottom: 8px;
   font-family: 'Arial', sans-serif;
   text-shadow: 1px 1px 4px #222, 0 0 8px #0002;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 } 

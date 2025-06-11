@@ -122,7 +122,7 @@ class Game {
         this.particles = [];
         
         // 게임 설정
-        this.monsterSpawnRate = 2000; // 몬스터 스폰 간격 (ms)
+        this.monsterSpawnRate = 1700; // 몬스터 스폰 간격 (ms) - 기존 2000에서 15% 감소
         this.lastMonsterSpawn = 0;
         this.itemDropChance = 0.1; // 아이템 드롭 확률
         
@@ -333,7 +333,7 @@ class Game {
                 this.createMonster(stage);
             }
             // 스폰 간격 감소
-            this.monsterSpawnRate = Math.max(500, 2000 - stage * 200);
+            this.monsterSpawnRate = Math.max(425, 1700 - stage * 170); // 15% 더 빠르게
         }
     }
     
@@ -635,7 +635,7 @@ class Game {
         this.xpOrbs = [];
         this.particles = [];
         this.score = 0;
-        this.monsterSpawnRate = 2000;
+        this.monsterSpawnRate = 1700;
         this.lastMonsterSpawn = 0;
         
         // 업그레이드/버프 상태 초기화
