@@ -391,14 +391,16 @@ class Game {
         }
         
         // 플레이어 vs 몬스터
-        this.monsters.forEach(monster => {
-            if (this.checkCollision(this.player, monster) && !this.player.isInvincible) {
-                this.player.takeDamage(monster.damage);
-                if (this.player.hp <= 0) {
-                    this.gameOver();
+        if (this.isRunning) {
+            this.monsters.forEach(monster => {
+                if (this.checkCollision(this.player, monster) && !this.player.isInvincible && this.player.hp > 0) {
+                    this.player.takeDamage(monster.damage);
+                    if (this.player.hp <= 0) {
+                        this.gameOver();
+                    }
                 }
-            }
-        });
+            });
+        }
         
         // 플레이어 vs XP 오브
         for (let i = this.xpOrbs.length - 1; i >= 0; i--) {
@@ -612,12 +614,12 @@ class Game {
     }
     
     gameOver() {
+        if (!this.isRunning) return; // 이미 종료된 경우 중복 실행 방지
         this.isRunning = false;
         const gameTime = Date.now() - this.gameStartTime;
         const minutes = Math.floor(gameTime / 60000);
         const seconds = Math.floor((gameTime % 60000) / 1000);
-        
-        document.getElementById('survivalTime').textContent = 
+        document.getElementById('survivalTime').textContent =
             `생존 시간: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         document.getElementById('finalScore').textContent = `최종 점수: ${this.score}`;
         document.getElementById('gameOverModal').classList.add('show');
