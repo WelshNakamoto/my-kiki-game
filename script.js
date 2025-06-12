@@ -155,7 +155,7 @@ class Game {
     init() {
         this.setupEventListeners();
         this.createPlayer();
-        setupTouchControls(); // 터치 컨트롤 설정 추가
+        setupTouchControls();
         this.start();
     }
     
@@ -1350,79 +1350,10 @@ class Particle {
     }
 }
 
-// 모바일 방향키(가상 D-Pad) 지원
-function triggerKey(key, isDown) {
-  // 실제 게임 객체의 keys를 직접 조작
-  if (window.game && game.keys) {
-    switch (key.toLowerCase()) {
-      case 'arrowup':
-        game.keys['arrowup'] = isDown;
-        game.keys['w'] = isDown;
-        break;
-      case 'arrowdown':
-        game.keys['arrowdown'] = isDown;
-        game.keys['s'] = isDown;
-        break;
-      case 'arrowleft':
-        game.keys['arrowleft'] = isDown;
-        game.keys['a'] = isDown;
-        break;
-      case 'arrowright':
-        game.keys['arrowright'] = isDown;
-        game.keys['d'] = isDown;
-        break;
-    }
-    console.log('game.keys:', JSON.stringify(game.keys));
-  }
-}
-function setupMobileDPad() {
-  const map = {
-    'dpad-up': 'arrowup',
-    'dpad-down': 'arrowdown',
-    'dpad-left': 'arrowleft',
-    'dpad-right': 'arrowright'
-  };
-  Object.keys(map).forEach(id => {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-    let pressed = false;
-    btn.addEventListener('touchstart', e => {
-      e.preventDefault();
-      if (!pressed) {
-        triggerKey(map[id], true);
-        pressed = true;
-      }
-    });
-    btn.addEventListener('touchend', e => {
-      e.preventDefault();
-      triggerKey(map[id], false);
-      pressed = false;
-    });
-    btn.addEventListener('mousedown', e => {
-      e.preventDefault();
-      if (!pressed) {
-        triggerKey(map[id], true);
-        pressed = true;
-      }
-    });
-    btn.addEventListener('mouseup', e => {
-      e.preventDefault();
-      triggerKey(map[id], false);
-      pressed = false;
-    });
-    btn.addEventListener('mouseleave', e => {
-      if (pressed) {
-        triggerKey(map[id], false);
-        pressed = false;
-      }
-    });
-  });
-}
-
-// 터치 이벤트 처리 함수 추가
+// 터치 이벤트 처리 함수 추가 (파일 내 적절한 위치에 삽입)
 function setupTouchControls() {
     const canvas = document.getElementById('gameCanvas');
-    
+    if (!canvas) return;
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
@@ -1431,14 +1362,12 @@ function setupTouchControls() {
         const scaleY = canvas.height / rect.height;
         const x = (touch.clientX - rect.left) * scaleX;
         const y = (touch.clientY - rect.top) * scaleY;
-        
         if (window.game && game.player) {
             game.player.isDragging = true;
             game.player.dragStartX = x;
             game.player.dragStartY = y;
         }
     });
-
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
@@ -1447,20 +1376,17 @@ function setupTouchControls() {
         const scaleY = canvas.height / rect.height;
         const x = (touch.clientX - rect.left) * scaleX;
         const y = (touch.clientY - rect.top) * scaleY;
-        
         if (window.game && game.player && game.player.isDragging) {
             game.player.dragStartX = x;
             game.player.dragStartY = y;
         }
     });
-
     canvas.addEventListener('touchend', (e) => {
         e.preventDefault();
         if (window.game && game.player) {
             game.player.isDragging = false;
         }
     });
-
     canvas.addEventListener('touchcancel', (e) => {
         e.preventDefault();
         if (window.game && game.player) {
@@ -1473,5 +1399,4 @@ function setupTouchControls() {
 var game;
 window.addEventListener('load', () => {
     game = new Game();
-    setupMobileDPad(); // D-Pad 바인딩을 game 생성 이후에 실행
 }); 

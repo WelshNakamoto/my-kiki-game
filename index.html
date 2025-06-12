@@ -88,14 +88,6 @@
         <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; color: white; font-size: 18px;">
             🎮 게임 로딩 중...
         </div>
-
-        <!-- 모바일 전용 십자 방향키 -->
-        <div id="mobileDPad">
-          <button class="dpad-btn" id="dpad-up">▲</button>
-          <button class="dpad-btn" id="dpad-left">◀</button>
-          <button class="dpad-btn" id="dpad-right">▶</button>
-          <button class="dpad-btn" id="dpad-down">▼</button>
-        </div>
     </div>
 
     <script>
@@ -121,19 +113,6 @@
                 document.getElementById('loading').innerHTML = '❌ script.js 파일을 찾을 수 없습니다!<br><button onclick="location.reload()">새로고침</button>';
             };
             document.head.appendChild(script);
-        });
-
-        // 모바일 전용 십자 방향키 이벤트 추가
-        const dpadButtons = document.querySelectorAll('.dpad-btn');
-        dpadButtons.forEach(btn => {
-            btn.addEventListener('mousedown', e => {
-                e.preventDefault();
-                console.log('mousedown', btn.id);
-            });
-            btn.addEventListener('mouseup', e => {
-                e.preventDefault();
-                console.log('mouseup', btn.id);
-            });
         });
     </script>
 </body>
