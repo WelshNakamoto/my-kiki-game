@@ -155,6 +155,7 @@ class Game {
     init() {
         this.setupEventListeners();
         this.createPlayer();
+        setupTouchControls(); // 터치 컨트롤 설정 추가
         this.start();
     }
     
@@ -670,20 +671,17 @@ class Player {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.radius = 21;
+        this.radius = 20;
         this.speed = 200;
         this.hp = 100;
         this.maxHp = 100;
-        this.xp = 0;
-        this.xpToNext = 100;
         this.level = 1;
-        
-        // 무기 설정
-        this.weaponDamage = 20;
-        this.attackCooldown = 1000;
+        this.exp = 0;
+        this.expToNextLevel = 100;
+        this.weaponDamage = 10;
+        this.attackCooldown = 500;
         this.lastAttack = 0;
-        
-        // 특수 효과
+        this.direction = 'down';
         this.isInvincible = false;
         this.invincibilityTime = 0;
         this.magnetActive = false;
@@ -696,41 +694,80 @@ class Player {
         this.missileDoubleTime = 0;
         this.rapidFireActive = false;
         this.rapidFireTime = 0;
-        // 방향 상태
-        this.direction = 'down'; // 기본값
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
     }
     
     update(deltaTime, keys) {
-        let dx = 0, dy = 0;
-        if (keys['w'] || keys['arrowup']) dy = -1;
-        if (keys['s'] || keys['arrowdown']) dy = 1;
-        if (keys['a'] || keys['arrowleft']) dx = -1;
-        if (keys['d'] || keys['arrowright']) dx = 1;
-        // 대각선 이동 정규화
-        if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
-        // 방향 갱신
-        if (dx !== 0 || dy !== 0) {
-            if (Math.abs(dx) > Math.abs(dy)) {
-                this.direction = dx > 0 ? 'right' : 'left';
-            } else if (Math.abs(dy) > 0) {
-                this.direction = dy > 0 ? 'down' : 'up';
+        // 터치 드래그 처리
+        if (this.isDragging) {
+            const dx = this.dragStartX - this.x;
+            const dy = this.dragStartY - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 0) {
+                // 방향 갱신
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    this.direction = dx > 0 ? 'right' : 'left';
+                } else {
+                    this.direction = dy > 0 ? 'down' : 'up';
+                }
+                
+                // 속도 부스트 적용
+                let currentSpeed = this.speed * 0.89; // 터치 이동은 0.65배 속도
+                if (this.speedBoostActive) {
+                    currentSpeed *= 1.2;
+                }
+                // 위치 업데이트 (천천히 따라가도록)
+                const moveDist = currentSpeed * (deltaTime / 1000);
+                if (distance <= moveDist) {
+                    this.x = this.dragStartX;
+                    this.y = this.dragStartY;
+                } else {
+                    this.x += (dx / distance) * moveDist;
+                    this.y += (dy / distance) * moveDist;
+                }
             }
-        }
-        // 속도 부스트 적용
-        let currentSpeed = this.speed;
-        if (this.speedBoostActive) {
-            currentSpeed *= 1.2;
-            this.speedBoostTime -= deltaTime;
-            if (this.speedBoostTime <= 0) {
-                this.speedBoostActive = false;
+        } else {
+            // 기존 키보드 이동 로직
+            let dx = 0, dy = 0;
+            if (keys['w'] || keys['arrowup']) dy = -1;
+            if (keys['s'] || keys['arrowdown']) dy = 1;
+            if (keys['a'] || keys['arrowleft']) dx = -1;
+            if (keys['d'] || keys['arrowright']) dx = 1;
+            
+            // 대각선 이동 정규화
+            if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
+            
+            // 방향 갱신
+            if (dx !== 0 || dy !== 0) {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    this.direction = dx > 0 ? 'right' : 'left';
+                } else if (Math.abs(dy) > 0) {
+                    this.direction = dy > 0 ? 'down' : 'up';
+                }
             }
+            
+            // 속도 부스트 적용
+            let currentSpeed = this.speed;
+            if (this.speedBoostActive) {
+                currentSpeed *= 1.2;
+                this.speedBoostTime -= deltaTime;
+                if (this.speedBoostTime <= 0) {
+                    this.speedBoostActive = false;
+                }
+            }
+            
+            // 위치 업데이트
+            this.x += dx * currentSpeed * (deltaTime / 1000);
+            this.y += dy * currentSpeed * (deltaTime / 1000);
         }
-        // 위치 업데이트
-        this.x += dx * currentSpeed * (deltaTime / 1000);
-        this.y += dy * currentSpeed * (deltaTime / 1000);
+
         // 화면 경계 처리
         this.x = Math.max(this.radius, Math.min(800 - this.radius, this.x));
         this.y = Math.max(this.radius, Math.min(600 - this.radius, this.y));
+
         // 무적 시간 처리
         if (this.isInvincible) {
             this.invincibilityTime -= deltaTime;
@@ -738,6 +775,7 @@ class Player {
                 this.isInvincible = false;
             }
         }
+
         // 자석 효과 처리
         if (this.magnetActive) {
             this.magnetTime -= deltaTime;
@@ -745,6 +783,7 @@ class Player {
                 this.magnetActive = false;
             }
         }
+
         // 쿨타임 감소 효과 처리
         if (this.cooldownReductionActive) {
             this.cooldownReductionTime -= deltaTime;
@@ -752,12 +791,14 @@ class Player {
                 this.cooldownReductionActive = false;
             }
         }
+
         if (this.missileDoubleActive) {
             this.missileDoubleTime -= deltaTime;
             if (this.missileDoubleTime <= 0) {
                 this.missileDoubleActive = false;
             }
         }
+
         if (this.rapidFireActive) {
             this.rapidFireTime -= deltaTime;
             if (this.rapidFireTime <= 0) {
@@ -844,13 +885,13 @@ class Player {
     }
     
     gainXP(amount) {
-        this.xp += amount;
+        this.exp += amount;
     }
     
     levelUp() {
         this.level++;
-        this.xp -= this.xpToNext;
-        this.xpToNext = Math.floor(this.xpToNext * 1.2);
+        this.exp -= this.expToNextLevel;
+        this.expToNextLevel = Math.floor(this.expToNextLevel * 1.2);
     }
     
     activateMagnet(duration) {
@@ -1376,6 +1417,56 @@ function setupMobileDPad() {
       }
     });
   });
+}
+
+// 터치 이벤트 처리 함수 추가
+function setupTouchControls() {
+    const canvas = document.getElementById('gameCanvas');
+    
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (touch.clientX - rect.left) * scaleX;
+        const y = (touch.clientY - rect.top) * scaleY;
+        
+        if (window.game && game.player) {
+            game.player.isDragging = true;
+            game.player.dragStartX = x;
+            game.player.dragStartY = y;
+        }
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (touch.clientX - rect.left) * scaleX;
+        const y = (touch.clientY - rect.top) * scaleY;
+        
+        if (window.game && game.player && game.player.isDragging) {
+            game.player.dragStartX = x;
+            game.player.dragStartY = y;
+        }
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (window.game && game.player) {
+            game.player.isDragging = false;
+        }
+    });
+
+    canvas.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        if (window.game && game.player) {
+            game.player.isDragging = false;
+        }
+    });
 }
 
 // 게임 시작
