@@ -555,16 +555,16 @@ class Game {
         document.getElementById('healthText').textContent = `HP: ${this.player.hp}/${this.player.maxHp}`;
         
         // 경험치바
-        const expPercent = (this.player.xp / this.player.xpToNext) * 100;
+        const expPercent = (this.player.exp / this.player.expToNextLevel) * 100;
         document.getElementById('expFill').style.width = expPercent + '%';
-        document.getElementById('expText').textContent = `XP: ${this.player.xp}/${this.player.xpToNext}`;
+        document.getElementById('expText').textContent = `XP: ${this.player.exp}/${this.player.expToNextLevel}`;
         
         // 레벨 및 점수
         document.getElementById('levelDisplay').textContent = `레벨: ${this.player.level}`;
         document.getElementById('scoreDisplay').textContent = `점수: ${this.score}`;
         
         // 레벨업 체크
-        if (this.player.xp >= this.player.xpToNext) {
+        if (this.player.exp >= this.player.expToNextLevel) {
             this.player.levelUp();
             this.showLevelUpModal();
         }
@@ -1354,20 +1354,14 @@ class Particle {
 function setupTouchControls() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) return;
+    // 터치 시작 시 이동 플래그만 켜고, 위치는 갱신하지 않음
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const x = (touch.clientX - rect.left) * scaleX;
-        const y = (touch.clientY - rect.top) * scaleY;
         if (window.game && game.player) {
             game.player.isDragging = true;
-            game.player.dragStartX = x;
-            game.player.dragStartY = y;
         }
     });
+    // 터치 이동 중일 때만 위치 갱신
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
@@ -1381,6 +1375,7 @@ function setupTouchControls() {
             game.player.dragStartY = y;
         }
     });
+    // 터치가 끝나면 이동 중지
     canvas.addEventListener('touchend', (e) => {
         e.preventDefault();
         if (window.game && game.player) {
