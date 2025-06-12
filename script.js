@@ -1395,8 +1395,7 @@ function setupTouchControls() {
     });
 }
 
-// 게임 시작
-var game;
-window.addEventListener('load', () => {
-    game = new Game();
-}); 
+// 게임 시작 함수로 분리
+function startKikiGame() {
+    window.game = new Game();
+} 

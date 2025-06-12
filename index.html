@@ -3,90 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 서바이벌 캣: 키키의 밤 Ver.5</title>
+    <title>최상의 게임 플레이어 - Tripo Games</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 간단한 추가 스타일 */
+        #mainPage { display: block; }
+        #gamePage { display: none; }
+        .main-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; background: #fff; }
+        .main-logo { font-size: 2rem; font-weight: bold; color: #222; }
+        .main-menu { display: flex; gap: 24px; }
+        .main-menu button { background: none; border: none; font-size: 1.1rem; font-weight: bold; color: #c44; padding: 8px 18px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+        .main-menu button.active, .main-menu button:hover { background: #ffe0e0; color: #a22; }
+        .main-hero { text-align: center; padding: 48px 0 24px 0; background: linear-gradient(135deg, #f8f8fa 60%, #ffe0e0 100%); }
+        .main-hero-title { font-size: 2.5rem; font-weight: bold; color: #222; margin-bottom: 12px; }
+        .main-hero-desc { font-size: 1.2rem; color: #666; margin-bottom: 18px; }
+        .main-hero-img { width: 180px; height: 180px; object-fit: contain; margin-bottom: 12px; }
+        .main-cards { display: flex; gap: 32px; justify-content: center; margin: 32px 0; }
+        .main-card { background: #fff; border-radius: 18px; box-shadow: 0 4px 24px #0002; overflow: hidden; width: 260px; cursor: pointer; border: 3px solid transparent; transition: border 0.2s; position: relative; }
+        .main-card.selected { border: 3px solid #ff4444; }
+        .main-card img { width: 100%; height: 220px; object-fit: cover; }
+        .main-card-title { font-size: 1.1rem; font-weight: bold; color: #333; padding: 12px 0 8px 0; text-align: center; }
+        .main-card-desc { font-size: 0.95rem; color: #666; text-align: center; padding-bottom: 12px; }
+        .main-all-btn { background: linear-gradient(135deg, #ffe066, #fffbe0); color: #a66; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 16px; padding: 32px 0; width: 260px; margin: 0 0 0 32px; box-shadow: 0 2px 12px #0001; cursor: pointer; }
+        @media (max-width: 900px) { .main-cards { flex-direction: column; align-items: center; gap: 18px; } .main-all-btn { margin: 18px 0 0 0; width: 90vw; } }
+    </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <!-- 상단 타이틀 -->
-        <div id="gameTitle">🎮 서바이벌 캣: 키키의 밤 (Copyright: 혜순♥️정돌)</div>
-        <!-- 상단 UI: KIKI 현황 + 아이템/버프 현황 -->
-        <div id="statusBar">
-          <div class="infoPanel">
-            <h3 class="info-title">KIKI 현황</h3>
-            <div class="bar-group">
-              <div class="bar-label" id="healthText">HP: 100/100</div>
-              <div class="bar-bg"><div class="bar-fill" id="healthFill"></div></div>
+    <div id="mainPage">
+        <div class="main-header">
+            <div class="main-logo">RichCat - KIKI</div>
+            <div class="main-menu">
+                <button class="active">Home</button>
+                <button>P2E</button>
+                <button>Dex</button>
+                <button>NFT</button>
+                <button>Support</button>
             </div>
-            <span id="timeDisplay" class="info-time">시간: 00:00</span>
-            <span id="levelDisplay">레벨: 1</span>
-            <div class="bar-group">
-              <div class="bar-label" id="expText">XP: 0/100</div>
-              <div class="bar-bg"><div class="bar-fill xp" id="expFill"></div></div>
-            </div>
-            <span id="scoreDisplay">점수: 0</span>
-          </div>
-          <div id="upgradeBuffPanel">
-            <h3>내 업그레이드/버프</h3>
-            <div id="upgradeInfo">
-              <div>무기 강화: <span id="upgradeWeapon">0</span>회</div>
-              <div>체력 증가: <span id="upgradeHp">0</span>회</div>
-              <div>이동속도: <span id="upgradeSpeed">0</span>회</div>
-            </div>
-            <div id="buffInfo"></div>
-          </div>
         </div>
-        
-        <!-- 게임 캔버스 -->
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="main-hero">
+            <img src="img/kiki_hero.png" alt="키키 캐릭터" class="main-hero-img">
+            <div class="main-hero-title">KIKI와 함께하는 최고의 Web3 게임 경험</div>
+            <div class="main-hero-desc">밈코인 기반 게임 제작 프로젝트</div>
+            <div style="margin: 18px 0;">
+                <img src="img/appstore.png" alt="App Store" style="height:40px; margin-right:8px;">
+                <img src="img/googleplay.png" alt="Google Play" style="height:40px;">
+            </div>
+        </div>
+        <div class="main-cards">
+            <div class="main-card" id="card1">
+                <img src="img/Website/game_kiki_night.png" alt="게임1">
+                <div class="main-card-title">키키의 밤</div>
+                <div class="main-card-desc">키키와 함께 생존 액션!<br>P2E 서바이벌 모험!</div>
+            </div>
+            <div class="main-card" id="card2">
+                <img src="img/Website/game_kiki_run.png" alt="게임2">
+                <div class="main-card-title">키키 런</div>
+                <div class="main-card-desc">키키와 질주 본능!<br>점프하고 달려라,키키!<br>무한 달리기 도전!</div>
+            </div>
+            <div class="main-card" id="card3">
+                <img src="img/Website/game_kiki_puzzle.png" alt="게임3">
+                <div class="main-card-title">키키 팡</div>
+                <div class="main-card-desc">KIKI 코인을 모아 도전하세요!<br>점수로 KIKI 보상 받자!<br>최고 점수엔 특별 보상이!</div>
+            </div>
+            <button class="main-all-btn">KIKI 유니버스 게임 모아보기<br>↓</button>
+        </div>
+    </div>
 
-        <!-- 레벨업 UI (처음에는 숨김) -->
-        <div id="levelUpModal" class="modal">
-            <div class="modal-content">
-                <h2>🎉 레벨업!</h2>
-                <p>업그레이드를 선택하세요:</p>
-                <div id="upgradeOptions">
-                    <button class="upgrade-btn" data-upgrade="0">
-                        <strong>무기 강화</strong>
-                        <br>공격력 +20%
-                    </button>
-                    <button class="upgrade-btn" data-upgrade="1">
-                        <strong>체력 증가</strong>
-                        <br>최대 HP +30
-                    </button>
-                    <button class="upgrade-btn" data-upgrade="2">
-                        <strong>이동 속도</strong>
-                        <br>속도 +15%
-                    </button>
+    <div id="gamePage">
+        <!-- 기존 Kiki 게임 UI 전체 복사 -->
+        <div id="gameContainer">
+            <div id="gameTitle">🎮 서바이벌 캣: 키키의 밤 (Copyright: 혜순♥️정돌)</div>
+            <div id="statusBar">
+              <div class="infoPanel">
+                <h3 class="info-title">KIKI 현황</h3>
+                <div class="bar-group">
+                  <div class="bar-label" id="healthText">HP: 100/100</div>
+                  <div class="bar-bg"><div class="bar-fill" id="healthFill"></div></div>
+                </div>
+                <span id="timeDisplay" class="info-time">시간: 00:00</span>
+                <span id="levelDisplay">레벨: 1</span>
+                <div class="bar-group">
+                  <div class="bar-label" id="expText">XP: 0/100</div>
+                  <div class="bar-bg"><div class="bar-fill xp" id="expFill"></div></div>
+                </div>
+                <span id="scoreDisplay">점수: 0</span>
+              </div>
+              <div id="upgradeBuffPanel">
+                <h3>내 업그레이드/버프</h3>
+                <div id="upgradeInfo">
+                  <div>무기 강화: <span id="upgradeWeapon">0</span>회</div>
+                  <div>체력 증가: <span id="upgradeHp">0</span>회</div>
+                  <div>이동속도: <span id="upgradeSpeed">0</span>회</div>
+                </div>
+                <div id="buffInfo"></div>
+              </div>
+            </div>
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <!-- 이하 기존 모달/로딩 UI 그대로 유지 -->
+            <div id="levelUpModal" class="modal">
+                <div class="modal-content">
+                    <h2>🎉 레벨업!</h2>
+                    <p>업그레이드를 선택하세요:</p>
+                    <div id="upgradeOptions">
+                        <button class="upgrade-btn" data-upgrade="0">
+                            <strong>무기 강화</strong>
+                            <br>공격력 +20%
+                        </button>
+                        <button class="upgrade-btn" data-upgrade="1">
+                            <strong>체력 증가</strong>
+                            <br>최대 HP +30
+                        </button>
+                        <button class="upgrade-btn" data-upgrade="2">
+                            <strong>이동 속도</strong>
+                            <br>속도 +15%
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- 게임 오버 UI -->
-        <div id="gameOverModal" class="modal">
-            <div class="modal-content">
-                <h2>💀 게임 오버</h2>
-                <p id="survivalTime">생존 시간: 00:00</p>
-                <p id="finalScore">최종 점수: 0</p>
-                <button id="restartBtn">다시 시작</button>
+            <div id="gameOverModal" class="modal">
+                <div class="modal-content">
+                    <h2>💀 게임 오버</h2>
+                    <p id="survivalTime">생존 시간: 00:00</p>
+                    <p id="finalScore">최종 점수: 0</p>
+                    <button id="restartBtn">다시 시작</button>
+                </div>
+            </div>
+            <div id="gameClearModal" class="modal">
+                <div class="modal-content">
+                    <h2>🎊 축하합니다!</h2>
+                    <p>10분 생존에 성공했습니다!</p>
+                    <p id="clearTime">생존 시간: 10:00</p>
+                    <p id="clearScore">최종 점수: 0</p>
+                    <button id="continueBtn">계속 플레이</button>
+                    <button id="restartClearBtn">다시 시작</button>
+                </div>
+            </div>
+            <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; color: white; font-size: 18px;">
+                🎮 게임 로딩 중...
             </div>
         </div>
+    </div>
 
-        <!-- 게임 클리어 UI -->
-        <div id="gameClearModal" class="modal">
-            <div class="modal-content">
-                <h2>🎊 축하합니다!</h2>
-                <p>10분 생존에 성공했습니다!</p>
-                <p id="clearTime">생존 시간: 10:00</p>
-                <p id="clearScore">최종 점수: 0</p>
-                <button id="continueBtn">계속 플레이</button>
-                <button id="restartClearBtn">다시 시작</button>
-            </div>
-        </div>
-
-        <!-- 로딩/오류 표시 -->
-        <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; color: white; font-size: 18px;">
-            🎮 게임 로딩 중...
+    <!-- 준비중 모달 -->
+    <div id="comingSoonModal" class="modal">
+        <div class="modal-content">
+            <h2>🚧 현재 준비중입니다.</h2>
+            <p>빠른 시일 내에 오픈될 예정입니다!</p>
+            <button id="closeComingSoonBtn">닫기</button>
         </div>
     </div>
 
@@ -99,20 +162,39 @@
 
         // DOM이 완전히 로드된 후 스크립트 실행
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM 로딩 완료, 게임 스크립트 로딩 시작...');
-            
-            // 스크립트 동적 로딩
-            const script = document.createElement('script');
-            script.src = 'script.js';
-            script.onload = function() {
-                console.log('게임 스크립트 로딩 완료!');
-                document.getElementById('loading').style.display = 'none';
-            };
-            script.onerror = function() {
-                console.error('script.js 로딩 실패!');
-                document.getElementById('loading').innerHTML = '❌ script.js 파일을 찾을 수 없습니다!<br><button onclick="location.reload()">새로고침</button>';
-            };
-            document.head.appendChild(script);
+            // 메인 카드 클릭 이벤트
+            document.getElementById('card1').addEventListener('click', function() {
+                document.getElementById('mainPage').style.display = 'none';
+                document.getElementById('gamePage').style.display = 'block';
+
+                // 기존 script.js가 있으면 제거
+                const oldScript = document.querySelector('script[src^="script.js"]');
+                if (oldScript) oldScript.remove();
+
+                // 게임 스크립트 동적 로딩 (캐시 우회)
+                const script = document.createElement('script');
+                script.src = 'script.js?v=' + Date.now();
+                script.onload = function() {
+                    document.getElementById('loading').style.display = 'none';
+                    // 게임 시작 함수 직접 호출
+                    if (typeof startKikiGame === 'function') startKikiGame();
+                };
+                script.onerror = function() {
+                    document.getElementById('loading').innerHTML = '❌ script.js 파일을 찾을 수 없습니다!<br><button onclick="location.reload()">새로고침</button>';
+                };
+                document.head.appendChild(script);
+            });
+            // card2, card3 클릭 시 준비중 모달 표시
+            document.getElementById('card2').addEventListener('click', function() {
+                document.getElementById('comingSoonModal').classList.add('show');
+            });
+            document.getElementById('card3').addEventListener('click', function() {
+                document.getElementById('comingSoonModal').classList.add('show');
+            });
+            // 모달 닫기 버튼
+            document.getElementById('closeComingSoonBtn').addEventListener('click', function() {
+                document.getElementById('comingSoonModal').classList.remove('show');
+            });
         });
     </script>
 </body>
