@@ -26,6 +26,26 @@
         .main-card-desc { font-size: 0.95rem; color: #666; text-align: center; padding-bottom: 12px; }
         .main-all-btn { background: linear-gradient(135deg, #ffe066, #fffbe0); color: #a66; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 16px; padding: 32px 0; width: 260px; margin: 0 0 0 32px; box-shadow: 0 2px 12px #0001; cursor: pointer; }
         @media (max-width: 900px) { .main-cards { flex-direction: column; align-items: center; gap: 18px; } .main-all-btn { margin: 18px 0 0 0; width: 90vw; } }
+        .home-btn {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            z-index: 2001;
+            background: linear-gradient(135deg, #fff, #ffe0e0);
+            color: #c44;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 2px solid #c44;
+            border-radius: 8px;
+            padding: 8px 22px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: background 0.2s, color 0.2s;
+        }
+        .home-btn:hover {
+            background: #ffe0e0;
+            color: #a22;
+        }
     </style>
 </head>
 <body>
@@ -33,17 +53,17 @@
         <div class="main-header">
             <div class="main-logo">RichCat - KIKI</div>
             <div class="main-menu">
-                <button class="active">Home</button>
-                <button>P2E</button>
-                <button>Dex</button>
-                <button>NFT</button>
-                <button>Support</button>
+                <button class="active" id="menuHome">Home</button>
+                <button id="menuP2E">P2E</button>
+                <button id="menuDex">Dex</button>
+                <button id="menuNFT">NFT</button>
+                <button id="menuSupport">Support</button>
             </div>
         </div>
         <div class="main-hero">
             <img src="img/kiki_hero.png" alt="키키 캐릭터" class="main-hero-img">
-            <div class="main-hero-title">KIKI와 함께하는 최고의 Web3 게임 경험</div>
-            <div class="main-hero-desc">밈코인 기반 게임 제작 프로젝트</div>
+            <div class="main-hero-title">스택스 블록체인 기반 게임 제작 프로젝트</div>
+            <div class="main-hero-desc">  KIKI와 함께하는 최고의 Web3 게임 경험</div>
             <div style="margin: 18px 0;">
                 <img src="img/appstore.png" alt="App Store" style="height:40px; margin-right:8px;">
                 <img src="img/googleplay.png" alt="Google Play" style="height:40px;">
@@ -70,6 +90,7 @@
     </div>
 
     <div id="gamePage">
+        <button id="goHomeBtn" class="home-btn">Home</button>
         <!-- 기존 Kiki 게임 UI 전체 복사 -->
         <div id="gameContainer">
             <div id="gameTitle">🎮 서바이벌 캣: 키키의 밤 (Copyright: 혜순♥️정돌)</div>
@@ -194,6 +215,21 @@
             // 모달 닫기 버튼
             document.getElementById('closeComingSoonBtn').addEventListener('click', function() {
                 document.getElementById('comingSoonModal').classList.remove('show');
+            });
+            // Home 버튼 클릭 시 메인 페이지로 이동
+            document.getElementById('goHomeBtn').addEventListener('click', function() {
+                document.getElementById('gamePage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+                // 필요시 location.reload(); // 완전 초기화가 필요하면 주석 해제
+            });
+            // 상단 메뉴 클릭 시 준비중 모달 표시
+            ['menuP2E', 'menuDex', 'menuNFT', 'menuSupport'].forEach(function(id) {
+                var btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        document.getElementById('comingSoonModal').classList.add('show');
+                    });
+                }
             });
         });
     </script>
