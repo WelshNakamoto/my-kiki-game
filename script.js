@@ -392,14 +392,18 @@ class Game {
         
         // 플레이어 vs 몬스터
         if (this.isRunning) {
-            this.monsters.forEach(monster => {
+            for (let i = 0; i < this.monsters.length; i++) {
+                const monster = this.monsters[i];
                 if (this.checkCollision(this.player, monster) && !this.player.isInvincible && this.player.hp > 0) {
+                    console.log(`[handleCollisions] 몬스터와 충돌! HP: ${this.player.hp}, Invincible: ${this.player.isInvincible}`);
                     this.player.takeDamage(monster.damage);
                     if (this.player.hp <= 0) {
+                        console.log(`[handleCollisions] HP 0 이하, gameOver 호출`);
                         this.gameOver();
                     }
+                    break; // 한 번만 데미지
                 }
-            });
+            }
         }
         
         // 플레이어 vs XP 오브
@@ -614,8 +618,9 @@ class Game {
     }
     
     gameOver() {
-        if (!this.isRunning) return; // 이미 종료된 경우 중복 실행 방지
+        if (!this.isRunning) return;
         this.isRunning = false;
+        console.log(`[gameOver] 게임 오버 호출! 최종 HP: ${this.player.hp}, 점수: ${this.score}`);
         const gameTime = Date.now() - this.gameStartTime;
         const minutes = Math.floor(gameTime / 60000);
         const seconds = Math.floor((gameTime % 60000) / 1000);
@@ -860,7 +865,8 @@ class Player {
     
     takeDamage(damage) {
         if (!this.isInvincible) {
-            this.hp -= damage;
+            this.hp = Math.max(0, this.hp - damage);
+            console.log(`[takeDamage] HP 감소: -${damage}, 남은 HP: ${this.hp}`);
             this.isInvincible = true;
             this.invincibilityTime = 1000; // 1초 무적
         }
