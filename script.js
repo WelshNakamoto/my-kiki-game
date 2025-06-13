@@ -699,37 +699,21 @@ class Player {
         this.isDragging = false;
         this.dragStartX = 0;
         this.dragStartY = 0;
+        this.dragDirX = 0;
+        this.dragDirY = 0;
     }
     
     update(deltaTime, keys) {
-        // 터치 드래그 처리
-        if (this.isDragging) {
-            const dx = this.dragStartX - this.x;
-            const dy = this.dragStartY - this.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance > 0) {
-                // 방향 갱신
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    this.direction = dx > 0 ? 'right' : 'left';
-                } else {
-                    this.direction = dy > 0 ? 'down' : 'up';
-                }
-                
-                // 속도 부스트 적용
-                let currentSpeed = this.speed * 0.89; // 터치 이동은 0.65배 속도
-                if (this.speedBoostActive) {
-                    currentSpeed *= 1.2;
-                }
-                // 위치 업데이트 (천천히 따라가도록)
-                const moveDist = currentSpeed * (deltaTime / 1000);
-                if (distance <= moveDist) {
-                    this.x = this.dragStartX;
-                    this.y = this.dragStartY;
-                } else {
-                    this.x += (dx / distance) * moveDist;
-                    this.y += (dy / distance) * moveDist;
-                }
+        if (this.isDragging && (this.dragDirX !== 0 || this.dragDirY !== 0)) {
+            let currentSpeed = this.speed * 0.89;
+            if (this.speedBoostActive) currentSpeed *= 1.2;
+            this.x += this.dragDirX * currentSpeed * (deltaTime / 1000);
+            this.y += this.dragDirY * currentSpeed * (deltaTime / 1000);
+            // 방향 갱신
+            if (Math.abs(this.dragDirX) > Math.abs(this.dragDirY)) {
+                this.direction = this.dragDirX > 0 ? 'right' : 'left';
+            } else {
+                this.direction = this.dragDirY > 0 ? 'down' : 'up';
             }
         } else {
             // 기존 키보드 이동 로직
@@ -1356,14 +1340,21 @@ class Particle {
 function setupTouchControls() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) return;
-    // 터치 시작 시 이동 플래그만 켜고, 위치는 갱신하지 않음
+    let dragStartX = 0, dragStartY = 0;
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        dragStartX = (touch.clientX - rect.left) * scaleX;
+        dragStartY = (touch.clientY - rect.top) * scaleY;
         if (window.game && game.player) {
             game.player.isDragging = true;
+            game.player.dragDirX = 0;
+            game.player.dragDirY = 0;
         }
     });
-    // 터치 이동 중일 때만 위치 갱신
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
@@ -1373,21 +1364,34 @@ function setupTouchControls() {
         const x = (touch.clientX - rect.left) * scaleX;
         const y = (touch.clientY - rect.top) * scaleY;
         if (window.game && game.player && game.player.isDragging) {
-            game.player.dragStartX = x;
-            game.player.dragStartY = y;
+            let dx = x - dragStartX;
+            let dy = y - dragStartY;
+            const len = Math.sqrt(dx*dx + dy*dy);
+            if (len > 10) { // 임계값
+                dx /= len;
+                dy /= len;
+                game.player.dragDirX = dx;
+                game.player.dragDirY = dy;
+            } else {
+                game.player.dragDirX = 0;
+                game.player.dragDirY = 0;
+            }
         }
     });
-    // 터치가 끝나면 이동 중지
     canvas.addEventListener('touchend', (e) => {
         e.preventDefault();
         if (window.game && game.player) {
             game.player.isDragging = false;
+            game.player.dragDirX = 0;
+            game.player.dragDirY = 0;
         }
     });
     canvas.addEventListener('touchcancel', (e) => {
         e.preventDefault();
         if (window.game && game.player) {
             game.player.isDragging = false;
+            game.player.dragDirX = 0;
+            game.player.dragDirY = 0;
         }
     });
 }
